@@ -1,14 +1,12 @@
-import { Component, HostListener } from '@angular/core';
-import { ChatService } from './service/chat.service';
+import { Component, Input } from '@angular/core';
+import { ChatService } from '../service/chat.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'app-chat-room',
+  templateUrl: './chat-room.component.html',
+  styleUrls: ['./chat-room.component.scss']
 })
-export class AppComponent {
-  title = 'chat-app';
-
+export class ChatRoomComponent {
   isOpened = false;
 
   public roomId: string;
@@ -16,9 +14,9 @@ export class AppComponent {
   public messageArray: { user: string, message: string }[] = [];
   private storageArray = [];
 
-  public showScreen = false;
+  @Input() showScreen = false;
   public phone: string;
-  public currentUser;
+  @Input() currentUser;
   public selectedUser;
   public loginUser;
 
@@ -125,6 +123,7 @@ export class AppComponent {
   }
 
   sendMessage(): void {
+    console.log('Message: ',this.messageText)
     this.chatService.sendMessage({
       user: this.currentUser.name,
       room: this.roomId,
@@ -156,34 +155,4 @@ export class AppComponent {
     this.messageText = '';
   }
 
-
-
-  openModal(): void {
-    this.isOpened = true;
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeModal(): void {
-    this.isOpened = false;
-    document.body.style.overflow = 'initial';
-  }
-
-  onLogin(): void {
-    console.log("Login button clicked");
-  }
-
-  @HostListener('window:scroll', [])
-  onWindowScroll(): void {
-    if (window.scrollY > window.innerHeight / 3 && !this.isOpened) {
-      this.isOpened = true;
-      this.openModal();
-    }
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  onKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      this.closeModal();
-    }
-  }
 }

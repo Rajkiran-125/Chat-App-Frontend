@@ -1,0 +1,627 @@
+// @import "compass/css3";
+
+// This needs a lot of cleanup!
+
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
+
+
+html {
+    background-image: radial-gradient(ellipse at top center, hsla(70, 50%, 90%, 1), hsla(240, 50%, 90%, 0)),
+                      radial-gradient(circle at bottom left, hsla(240, 50%, 90%, 1), hsla(240, 50%, 90%, 0)),
+                      radial-gradient(circle at bottom right, hsla(80, 100%, 90%, 1), hsla(240, 50%, 90%, 0));
+    box-shadow: 0 0 100px rgba(0,0,0,.2) inset;
+    min-height: 100%;
+}
+
+body{
+  font-family: 'Source Sans Pro', sans-serif;  
+}
+
+.window{
+  position:relative;
+  
+  margin:50px auto;
+  
+  width:840px;
+  height:640px;
+  
+  border-radius:4px;
+  border:1px solid #C1C1BF;
+  
+  box-shadow: 0 0 100px hsla(0,0%,0%, .3);
+  
+  background:white;
+  
+  overflow:hidden;  
+}
+
+.conv-list-view{  
+   position:absolute;
+  
+   width:270px;
+   height:100%;
+
+   box-shadow:0 0 4px hsla(0, 0%, 50%, .7);
+  
+   background:white;
+  
+   z-index:1;
+}
+
+.conv-list-view__header{
+  height:50px;
+  border-bottom:1px solid #F0F0F0;
+}
+
+%pseudo-content{
+  position:absolute;
+  content:'';  
+}
+
+%vertical-list{
+  list-style:none;  
+  li{
+    float:left;
+  }
+}
+
+.conv-list{
+  @extend %vertical-list;  
+  
+  position:absolute;
+  left:0;right:0;
+  margin:0;padding:0;
+ 
+  
+  li{
+    box-sizing:border-box;
+    
+    padding:.5em .5em;
+    width:100%;
+    
+    border-bottom:1px solid #E3E3E3;
+    
+    overflow-x:hidden; 
+  }
+  .selected{
+    background-color:#FBFBFB; 
+    box-shadow:0  1px 1px 0 hsla(0, 0%, 90%, .3) inset,
+               0 -1px 1px 0 hsla(0, 0%, 90%, .3) inset;
+  }
+}
+
+.close-button-list{
+  @extend %vertical-list;
+  
+  display:inline-block;
+  
+  margin:0;padding:19px 10px;
+  
+  float:left;
+  
+  li{
+    width:12px;
+    height:12px;    
+        
+    margin-left:8px;
+    
+    background-image:radial-gradient(20px 15px at center 15%, white, rgba(255,255,255,0) 35%),
+                   radial-gradient(30px 30px at center bottom, white, transparent);
+    background-color:#D9D9D9;
+  
+    border-radius:100%;
+  
+    box-shadow:0 1px 1px hsla(0, 20%, 20%, .4) inset,
+               0 -1px 1px hsla(0, 20%, 20%, .3) inset;
+    
+  }
+}
+
+
+.status{ 
+  position:relative; 
+  padding:0 1em;
+  
+  float:left;
+} 
+
+.status__indicator{ 
+  position:absolute; 
+  
+  left: 0; 
+  
+  width:8px; 
+  height:100%; 
+    
+  
+  &:after, &:before{
+    @extend %pseudo-content; 
+    top:50%;     
+  }
+}
+
+.status__indicator--online{
+  @extend .status__indicator;
+  
+  &:after{
+    margin-top:-4px;
+      
+    width:8px;
+    height:8px;
+  
+    border-radius:100%;
+  
+    box-shadow:0  0   1px hsla(0, 0%, 10%, 1)  inset,
+               0 -1px 3px hsla(0, 0%, 15%, .6) inset;
+  
+    background-color:#66B736;  
+  }
+}
+
+.status__indicator--unread-message{
+  @extend .status__indicator--online;
+  &:after{
+    background-color:#5383E3;
+  }
+}
+
+
+.status__indicator--replied-message{
+  @extend .status__indicator;
+  
+  left:-2px;
+  
+  &:before{
+    margin-top:-4px;
+      
+    border-style: solid;      
+    border-width: 4px 5px 4px 0;
+    border-color: transparent #BBBEC4 transparent transparent;
+      
+    transform:rotate(360deg);
+  }
+    
+  &:after{
+    left:-5px;
+    margin-top:-2px;
+      
+    width:16px;
+    height:18px;
+      
+    clip:rect(0 auto auto 8px);
+      
+    border-top:4px solid #BBBEC4;
+    border-radius:50%;      
+  }
+}
+
+.status__indicator--read-message{
+  @extend .status__indicator;
+  &:after,&:before{
+    background-color:#BBBEC4;
+    border-radius:.2em;
+  }
+  &:before{
+    width:.15em; 
+    height:.3em;
+    transform:rotate(-45deg);
+  }
+  &:after{
+    margin-top:-.25em;
+    left:.28em;      
+    width:.12em; 
+    height:.6em;
+    transform:rotate(45deg);
+  }
+}
+
+.status__avatar{
+  position:relative;
+  display:block;
+    
+  float:left;
+  
+  width:2.5em;
+  height:2.5em;
+  
+  border-radius:.3em;
+   
+  margin:0 .5em 0 0;
+  
+  &:before{
+    position:absolute;
+    content:'';
+    top:0;left:0;right:0;bottom:0;
+    box-shadow:0 0 .125em hsla(0, 0%, 10%, 1) inset,
+               0 0 .312em hsla(0, 0%, 10%, 1) inset; 
+  }
+  
+  overflow:hidden;
+  
+  img{
+    width:inherit;
+    height:inherit;    
+  }
+}
+
+.status__avatar--small{
+  @extend .status__avatar;
+  font-size:.8em;
+}
+
+.status__avatar--facebook{
+  @extend .status__avatar;
+  &:after{
+    box-sizing:border-box;
+    position:absolute;
+    
+    font-weight:bold;
+      
+    content:'f';
+    
+    padding:0 .3em;
+    line-height:15px;
+    
+    right:0;
+    bottom:0;
+    
+    width:15px;
+    height:15px;
+    
+    color:white;
+    background-color:#485396;
+    
+    box-shadow:0 0 1px #2D3989 inset;
+    border-radius:3px 0 0 0;
+  }
+}
+
+.meta{
+  white-space:nowrap; 
+}
+
+.meta__sub{ 
+  font-size:.8em;
+}
+.meta__sub--dark{
+  @extend .meta__sub;
+  color:#8D8D8D;
+}
+.meta__sub--light{
+  @extend .meta__sub;
+  color:#A5A5A4;  
+}
+
+
+.chat-view{
+  position:absolute;
+  
+  left:270px;
+  right:0;
+  bottom:0;
+  top:0;
+  
+  padding:.625em 1.25em 1.25em 1.25em;
+  
+  background:#F2F1EC;  
+  
+  z-index:0;
+}
+
+.chat-view__header{
+  position:relative;
+  border-bottom:1px solid hsla(0, 0%, 50%, .1);  
+  
+  height:40px; // 50 - 10 padding
+  
+  &:after{
+    position:absolute;
+    content:'';
+    bottom:-15px;
+    left:0;
+    right:0;
+      
+    height:15px;
+    background:radial-gradient(50% 30% at center top, hsla(0, 0%, 50%, .1), transparent);
+  }
+}
+.message-view{
+  padding:1em;
+  font-size:.9em;
+}
+
+.message--send{
+  float:right;
+}
+
+.message__bubble{
+  float:left;
+  
+  position:relative;
+  display:inline-block;
+  
+  margin:.5em .75em;
+  padding:.1em .5em;
+  
+  border-radius:1.5em;
+  
+  text-shadow:0 1px 1px white;
+  
+  background-color:#F5F4F1;
+  
+  border:1px solid #CDCDCA;
+  box-shadow: 0   1px   1px 0  #CDCDCA;  
+  
+  overflow:hidden;
+  
+  &:after{
+    @extend %pseudo-content;
+    top:0;bottom:0;
+    left:0;right:0;
+      
+      
+    border-radius:inherit;
+    
+    background:radial-gradient(40% 5px at 50% 5px, rgba(255,255,255,.4) 70%, rgba(255,255,255,0));
+  }
+    
+}
+
+.message__bubble--send{
+  @extend .message__bubble;
+  
+  background-color:#E9F2DC;
+  
+  border:1px solid #B7C8A1; 
+  &:after{
+    background:radial-gradient(40% 5px at 50% 5px, rgba(255,255,255,.2) 70%, rgba(255,255,255,0));
+  }
+}
+
+.message__avatar{
+  @extend .status__avatar;
+  margin-right:0;
+}
+
+.chat-view__input{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:.25em .5em .5em .75em;  
+}
+
+.input{
+  position:relative; 
+  float:left;
+    
+  
+  width:480px;
+  
+  margin-top:1px;
+  
+  background:white; 
+  
+  padding:0 .3em;
+  
+  border:none;
+  border-radius:4px;
+  
+  border:1px solid #CDCDCA;
+  box-shadow: 0   0   2px 0  #CDCDCA inset;
+
+  white-space:nowrap; 
+  
+  &:after{
+    @extend %pseudo-content;
+    top:50%;
+    right:-2px;    
+    
+    margin-top:-3px;
+      
+    width:6px;
+    height:6px;
+      
+    background:white; 
+      
+    box-shadow: 1px -1px 0 .5px #CDCDCA;
+      
+    transform:rotate(45deg);
+  }
+    
+  input{
+    font-size:1.1em;
+    appearance:none;
+    border:none; 
+    width:93%;     
+      
+    outline:none; // BAD!! 
+  }
+}
+
+.input__emoticon{
+  position:relative;
+  display:inline-block;
+  float:right;
+  
+  margin-top:.32em; 
+   
+  height:.8em;
+  width:.8em;
+  
+  opacity:.5;
+  
+  border:.15em solid #B3B3B1;  
+  border-radius:100%;
+  
+  &:after, &:before{
+    @extend %pseudo-content;
+    border-radius:100%;
+  }
+  &:before{
+   top:.14em;
+   left:.15em;
+     
+   width:.2em;
+   height:.2em;
+      
+   background-color:#B3B3B1;
+   box-shadow:.35em 0 0 0 #B3B3B1;   
+  }
+  &:after{
+    top:.12em;
+    left:.12em;
+    right:.12em;
+    bottom:.12em;  
+    
+    clip:rect(.3em auto auto 0);
+      
+    border: .125em solid #B3B3B1;
+  }
+}
+
+.function-list{
+  @extend %vertical-list;
+  margin:0;padding:5px 0;
+  float:right;
+  li{  
+    margin-left:1.25em;
+  }
+}
+
+%icon{
+  position:relative;
+  
+  &:after,
+  &:before{
+    position:absolute;
+    content:'';
+  }
+}
+
+.icon-clock{
+  @extend %icon;
+  
+  position:relative;
+  width:.9em;
+  height:.9em;  
+  border:.13em solid #71716E;
+  border-radius:100%;
+  
+  &:after,
+  &:before{
+    left:.4em;
+    background-color:#71716E;
+  }
+    
+  &:after{
+    top:.4em;
+    width:.3em;
+    height:.13em;
+  }
+    
+  &:before{
+    top:.15em;
+    height:.3em;
+    width:.13em;  
+  }
+}
+
+
+.icon-cloud{
+  @extend %icon;
+  
+  margin:.5em 0;
+  
+  width:1.5em;
+  height:.5em;
+  
+  background-color:#71716E;
+  
+  border-radius:25em;
+  
+  &:after{
+    top:-.25em;
+    left:.15em;
+    width:.75em;
+    height:.75em;
+    background-color:inherit;
+    border-radius:100%;
+    box-shadow:.4em -.2em 0 .05em #71716E;
+  }
+    
+  &:before{
+    top:-.4em;
+    left:.89em;
+    content:'⬆';
+    font-size:.55em;
+    color:white;
+    z-index:1;
+  }
+}
+
+.icon-dots{
+  @extend %icon;
+  width:.35em;
+  height:.35em;
+  margin-top:.5em;
+  margin-right:1.15em;
+  background-color: #71716E;
+  border-radius:100%;
+  
+  box-shadow:.5em 0 0 #71716E,
+              1em 0 0 #71716E;
+}
+
+.icon-lupe{
+   @extend %icon;
+   margin:.85em .9em 0 0;
+   width:.4em;
+   height:.4em;
+   border:.15em solid #71716E;
+   border-radius:100%;  
+   &:after{
+     height:.38em;
+     width:.2em;
+     background:#71716E;
+     right:-.2em;
+     bottom:-.3em;
+     transform:rotate(-45deg);
+     border-radius:0 0 1em 1em;
+   }
+}
+
+h1{
+  text-align:center;  
+  text-shadow:0 1px 1px white;
+}
+
+.credit{
+  font-size:.8em;
+  
+  color:gray;
+  
+  width:840px;
+  margin:0 auto;
+  text-align:center;
+  
+  text-shadow:0 1px 1px white;
+}
+
+a{
+  color:darkblue;
+  text-decoration:none;  
+}
+a:hover{
+  text-decoration:underline;  
+}
+
+.cf:before,
+.cf:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.cf:after {
+    clear: both;
+}
