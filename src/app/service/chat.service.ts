@@ -40,8 +40,8 @@ export class ChatService {
     return new Observable<{user: string, message: string}>(observer => {
       this.socket.on('new message', (data) => {
         observer.next(data);
+        console.log(data);
       });
-
       return () => {
         this.socket.disconnect();
       }

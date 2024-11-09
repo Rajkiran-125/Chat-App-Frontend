@@ -107,7 +107,7 @@
         </ul>
       </div>
       <div class="msg-body">
-
+        {{messageArray | json}}
         <div class="message-feed " *ngFor="let item of messageArray" [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
           <!-- <div class="pull-left">
             <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">

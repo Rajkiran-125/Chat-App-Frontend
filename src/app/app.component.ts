@@ -81,13 +81,15 @@ export class AppComponent {
     console.log('this.showScreen', this.showScreen)
     this.chatService.getMessage()
       .subscribe((data: { user: string, room: string, message: string }) => {
-        // this.messageArray.push(data);
+        this.messageArray.push(data);
         if (this.roomId) {
           setTimeout(() => {
             this.storageArray = this.chatService.getStorage();
             const storeIndex = this.storageArray
               .findIndex((storage) => storage.roomId === this.roomId);
-            this.messageArray = this.storageArray[storeIndex].chats;
+              console.log('storageArray',this.storageArray)
+              console.log('storeIndex', storeIndex);
+            // this.messageArray = this.storageArray[storeIndex].chats;
           }, 500);
         }
       });
