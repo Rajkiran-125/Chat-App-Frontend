@@ -22,7 +22,7 @@ export class AppComponent {
   public selectedUser;
   public loginUser;
 
-  menuToggled = false;
+  menuToggled = true;
   replyText = '';
 
   public userList = [
@@ -32,20 +32,19 @@ export class AppComponent {
       phone: '8286231170',
       image: 'https://bootdey.com/img/Content/avatar/avatar1.png',
       roomId: {
-
-        2: 'room-2',
-        3: 'room-3',
-        4: 'room-4'
+        2: 'room-1',
+        3: 'room-4',
+        4: 'room-3'
       }
     },
     {
       id: 2,
       name: 'Mohit',
-      phone: '1800000',
+      phone: '18',
       image: 'https://bootdey.com/img/Content/avatar/avatar2.png',
       roomId: {
         1: 'room-1',
-        3: 'room-4',
+        3: 'room-2',
         4: 'room-5'
       }
     },
@@ -55,8 +54,8 @@ export class AppComponent {
       phone: '10',
       image: 'https://bootdey.com/img/Content/avatar/avatar3.png',
       roomId: {
-        1: 'room-2',
-        2: 'room-4',
+        1: 'room-4',
+        2: 'room-2',
         4: 'room-6'
       }
     },
@@ -178,32 +177,4 @@ export class AppComponent {
 
 
 
-  openModal(): void {
-    this.isOpened = true;
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeModal(): void {
-    this.isOpened = false;
-    document.body.style.overflow = 'initial';
-  }
-
-  onLogin(): void {
-    console.log("Login button clicked");
-  }
-
-  @HostListener('window:scroll', [])
-  onWindowScroll(): void {
-    if (window.scrollY > window.innerHeight / 3 && !this.isOpened) {
-      this.isOpened = true;
-      this.openModal();
-    }
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  onKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      this.closeModal();
-    }
-  }
 }

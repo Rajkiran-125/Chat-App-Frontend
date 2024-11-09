@@ -212,11 +212,15 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
 }
+
 .msg-body{
   overflow-y: scroll;
   height: 80vh;
 }
+
 .active{
   background: #B3B3B3;
 }
-
+.pull-left{
+  margin-left: 30px;
+}
