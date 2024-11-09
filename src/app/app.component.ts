@@ -81,22 +81,40 @@ export class AppComponent {
     console.log('this.showScreen', this.showScreen)
     this.chatService.getMessage()
       .subscribe((data: { user: string, room: string, message: string }) => {
-        this.messageArray.push(data);
+        // this.messageArray.push(data);
         if (this.roomId) {
           setTimeout(() => {
             this.storageArray = this.chatService.getStorage();
             const storeIndex = this.storageArray
               .findIndex((storage) => storage.roomId === this.roomId);
-              console.log('storageArray',this.storageArray)
-              console.log('storeIndex', storeIndex);
+            console.log('storageArray', this.storageArray)
+            console.log('storeIndex', storeIndex);
             // this.messageArray = this.storageArray[storeIndex].chats;
+            if (storeIndex > -1) {
+              this.messageArray = this.storageArray[storeIndex].chats.push({
+                user: data.user,
+                message: data.message
+              });
+            } else {
+              const updateStorage = {
+                roomId: data.room,
+                chats: [{
+                  user: data.user,
+                  message: data.message
+                }]
+              };
+              console.log(updateStorage);
+              this.storageArray.push(updateStorage);
+              this.messageArray = this.storageArray;
+              this.chatService.setStorage(this.storageArray);
+            }
           }, 500);
         }
       });
   }
 
-  valueRecievedOutput(value){
-    console.log('value',value);
+  valueRecievedOutput(value) {
+    console.log('value', value);
     this.phone = value.phone;
     this.showScreen = value.showScreen;
     this.login();
@@ -137,7 +155,7 @@ export class AppComponent {
   }
 
   join(username: string, roomId: string): void {
-    this.chatService.joinRoom({user: username, room: roomId});
+    this.chatService.joinRoom({ user: username, room: roomId });
   }
 
   sendMessage(): void {

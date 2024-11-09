@@ -40,6 +40,28 @@ export class ChatService {
     return new Observable<{user: string, message: string}>(observer => {
       this.socket.on('new message', (data) => {
         observer.next(data);
+
+        // let storageArray = this.getStorage();
+        // const storeIndex = storageArray
+        //   .findIndex((storage) => storage.roomId === data.room);
+        // if (storeIndex > -1) {
+        //   storageArray[storeIndex].chats.push({
+        //     user: data.name,
+        //     message: data.message
+        //   });
+        // } else {
+        //   const updateStorage = {
+        //     roomId: data.room,
+        //     chats: [{
+        //       user: data.name,
+        //       message: data.message
+        //     }]
+        //   };
+        //   console.log(updateStorage)
+        //   storageArray.push(updateStorage);
+        // }
+    
+        // this.setStorage(storageArray);
         console.log(data);
       });
       return () => {
