@@ -1,19 +1,31 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Socket,io } from 'socket.io-client';
+import { HttpClient } from '@angular/common/http';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-
   
   private socket: Socket;
-  private url = 'http://localhost:3000'; // your server local path
-  // private url = 'https://chat-app-node-socket-io-5m2o.onrender.com'; // your server local path
+  // private url = 'http://localhost:3000'; // your server local path
+  private url = 'https://chat-app-node-socket-io-5m2o.onrender.com'; // your server local path
 
-  constructor() {
+  constructor(
+    private http: HttpClient
+  ) {
     this.socket = io(this.url, {transports: ['websocket', 'polling', 'flashsocket']});
+  }
+
+  ngOnInit(): void {
+    this.wakeUpApi();
+  }
+
+  wakeUpApi(){
+    const res = this.http.get(this.url);
+    console.log(res);
   }
 
   joinRoom(data): void {

@@ -22,14 +22,17 @@ export class AppComponent {
   public selectedUser;
   public loginUser;
 
+  menuToggled = false;
+  replyText = '';
+
   public userList = [
     {
       id: 1,
       name: 'Rajkiran Jaiswar',
       phone: '8286231170',
-      image: 'assets/user/user-1.png',
+      image: 'https://bootdey.com/img/Content/avatar/avatar1.png',
       roomId: {
-        1: 'room-1',
+
         2: 'room-2',
         3: 'room-3',
         4: 'room-4'
@@ -37,9 +40,9 @@ export class AppComponent {
     },
     {
       id: 2,
-      name: 'Neha',
+      name: 'Mohit',
       phone: '1800000',
-      image: 'assets/user/user-2.png',
+      image: 'https://bootdey.com/img/Content/avatar/avatar2.png',
       roomId: {
         1: 'room-1',
         3: 'room-4',
@@ -48,9 +51,9 @@ export class AppComponent {
     },
     {
       id: 3,
-      name: 'Mohit',
+      name: 'Neha',
       phone: '10',
-      image: 'assets/user/user-3.png',
+      image: 'https://bootdey.com/img/Content/avatar/avatar3.png',
       roomId: {
         1: 'room-2',
         2: 'room-4',
@@ -60,8 +63,8 @@ export class AppComponent {
     {
       id: 4,
       name: 'Dianne Russell',
-      phone: '9876556789',
-      image: 'assets/user/user-4.png',
+      phone: '20',
+      image: 'https://bootdey.com/img/Content/avatar/avatar4.png',
       roomId: {
         1: 'room-3',
         2: 'room-5',
@@ -91,6 +94,17 @@ export class AppComponent {
       });
   }
 
+  valueRecievedOutput(value){
+    console.log('value',value);
+    this.phone = value.phone;
+    this.showScreen = value.showScreen;
+    this.login();
+  }
+
+  toggleMenu() {
+    this.menuToggled = !this.menuToggled;
+  }
+
   login(): void {
 
     this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
@@ -102,6 +116,7 @@ export class AppComponent {
       this.showScreen = true;
       console.log('this.showScreen', this.showScreen)
     }
+
   }
 
   selectUserHandler(phone: string): void {
@@ -130,6 +145,11 @@ export class AppComponent {
       room: this.roomId,
       message: this.messageText
     });
+
+    if (this.replyText.trim()) {
+      console.log('Message sent:', this.replyText);
+      this.replyText = ''; // Clear the textarea
+    }
 
     this.storageArray = this.chatService.getStorage();
     const storeIndex = this.storageArray

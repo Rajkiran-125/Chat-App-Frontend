@@ -1,213 +1,149 @@
-<!-- <div class="container-fluid" *ngIf="showScreen">
-
-  <div class="row">
-    <div class="col-md-4">
-
-      <div class="user-details user-card">
-        <img [src]="loginUser[0]?.image" [alt]="loginUser[0]?.name" class="avatar" />
-        <p class="username">{{loginUser[0]?.name}}</p>
+<div class="container bootstrap snippets bootdey" *ngIf="showScreen">
+  <div class="tile tile-alt" id="messages-main">
+    <div class="ms-menu">
+      <div class="ms-user clearfix">
+        <img [src]="currentUser?.image" alt="" class="img-avatar pull-left">
+        <div>{{currentUser.name}} <br> m-hollaway&#64;gmail.com</div>
       </div>
 
-      <div class="user-list-card">
-        <div class="user-card" [ngClass]="user?.phone === selectedUser?.phone && 'active'" *ngFor="let user of userList"
+      <div class="p-15">
+        <div class="dropdown">
+          <a class="btn btn-primary btn-block" href="" data-toggle="dropdown">Messages <i class="caret m-l-5"></i></a>
+
+          <ul class="dropdown-menu dm-icon w-100">
+            <li><a href=""><i class="fa fa-envelope"></i> Messages</a></li>
+            <li><a href=""><i class="fa fa-users"></i> Contacts</a></li>
+            <li><a href=""><i class="fa fa-format-list-bulleted"> </i>Todo Lists</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="list-group lg-alt">
+        <!-- {{selectedUser | json}} -->
+        <a class="list-group-item media" [ngClass]="user?.phone === selectedUser?.phone && 'active'" *ngFor="let user of userList"
           (click)="selectUserHandler(user?.phone)">
+          <div class="pull-left">
+            <img [src]="user.image" alt="" class="img-avatar">
+          </div>
+          <div class="media-body">
+            <small class="list-group-item-heading">{{user.name}}</small>
+            <!-- <small class="list-group-item-text c-gray">Fierent fastidii recteque ad pro</small> -->
+          </div>
+        </a>
 
-          <img [src]="user?.image" [alt]="user?.name" class="avatar" />
-          <p class="username">{{user?.name}}</p>
+        <!-- <a class="list-group-item media" href="">
+          <div class="pull-left">
+            <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
+          </div>
+          <div class="media-body">
+            <div class="list-group-item-heading">Ann Watkinson</div>
+            <small class="list-group-item-text c-gray">Cum sociis natoque penatibus </small>
+          </div>
+        </a> -->
 
-        </div>
       </div>
 
-    </div>
-    <div class="col-md-8">
-
-      <div class="chat-container">
-        <ng-container *ngIf="selectedUser">
-          <div class="chat-header">
-
-            <img [src]="selectedUser?.image" [alt]="selectedUser?.name" class="avatar" />
-            <p class="username">{{selectedUser?.name}}</p>
-
-          </div>
-
-          <div class="chat-body">
-            <div *ngFor="let item of messageArray" [ngClass]="item?.user === currentUser?.name && 'same-user'">
-              <p class="message-container">{{item?.message}}</p>
-            </div>
-          </div>
-
-          <div class="chat-footer">
-
-            <div class="row">
-              <div class="col-md-10">
-                <div class="form-group mb-0">
-                  <input type="text" placeholder="Type a message" class="form-control" [(ngModel)]="messageText"
-                    (keyup)="$event.keyCode === 13 && sendMessage()" />
-                </div>
-              </div>
-
-              <div class="col-md-2 text-center align-self-center">
-                <button class="btn btn-primary btn-sm px-3" (click)="sendMessage()">Send
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </ng-container>
-      </div>
 
     </div>
 
+    <div class="ms-body">
+      <div class="action-header clearfix">
+        <!-- <div class="visible-xs" id="ms-menu-trigger">
+          <i class="fa fa-bars"></i>
+        </div> -->
+
+        <div class="pull-left hidden-xs" *ngIf="selectedUser" >
+          <img [src]="selectedUser?.image" alt="" class="img-avatar m-r-10">
+          <div class="lv-avatar pull-left">
+
+          </div>
+          <span>{{selectedUser.name}}</span>
+        </div>
+
+        <ul class="ah-actions actions">
+          <li>
+            <a href="">
+              <i class="fa fa-trash"></i>
+            </a>
+          </li>
+          <li>
+            <a href="">
+              <i class="fa fa-check"></i>
+            </a>
+          </li>
+          <li>
+            <a href="">
+              <i class="fa fa-clock-o"></i>
+            </a>
+          </li>
+          <li class="dropdown">
+            <a href="" data-toggle="dropdown" aria-expanded="true">
+              <i class="fa fa-sort"></i>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-right">
+              <li>
+                <a href="">Latest</a>
+              </li>
+              <li>
+                <a href="">Oldest</a>
+              </li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="" data-toggle="dropdown" aria-expanded="true">
+              <i class="fa fa-bars"></i>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-right">
+              <li>
+                <a href="">Refresh</a>
+              </li>
+              <li>
+                <a href="">Message Settings</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="msg-body">
+
+        <div class="message-feed " *ngFor="let item of messageArray" [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
+          <!-- <div class="pull-left">
+            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
+          </div> -->
+          <div class="media-body">
+            <div class="mf-content">
+              {{item?.message}}
+            </div>
+            <small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:00</small>
+          </div>
+        </div>
+
+        <!-- <div class="message-feed right">
+          <div class="pull-right">
+            <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
+          </div>
+          <div class="media-body">
+            <div class="mf-content">
+              Mauris volutpat magna nibh, et condimentum est rutrum a. Nunc sed turpis mi. In eu massa a sem pulvinar
+              lobortis.
+            </div>
+            <small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:30</small>
+          </div>
+        </div> -->
+
+
+      </div>
+
+      <div class="msb-reply">
+        <!-- <textarea placeholder="What's on your mind..."></textarea> -->
+        <input type="text" placeholder="Type a message" class="form-control" [(ngModel)]="messageText"
+        (keyup)="$event.keyCode === 13 && sendMessage()" />
+        <button (click)="sendMessage()"><i class="fa fa-paper-plane-o"></i></button>
+      </div>
+    </div>
   </div>
-
-</div> -->
-<!-- <app-chat-room *ngIf="showScreen" [showScreen]="showScreen" [currentUser]="currentUser"></app-chat-room> -->
-<div *ngIf="showScreen">
-  <!-- <img [src]="loginUser[0]?.image" [alt]="loginUser[0]?.name" class="avatar" /> -->
-  <h1>{{loginUser[0]?.name}}</h1>
-  <div class="window">
-    <aside class="conv-list-view">
-      <header class="conv-list-view__header">
-        <div class="cf">
-          <ul class="close-button-list">
-            <li></li>
-            <li></li>
-            <li></li>
-          </ul>
-          <ul class="function-list">
-            <li class="icon-lupe"></li>
-          </ul>
-        </div>
-      </header>
-      <ul class="conv-list">
-
-        <li [ngClass]="user?.phone === selectedUser?.phone && 'selected'" *ngFor="let user of userList"
-        (click)="selectUserHandler(user?.phone)">
-          <div class="status">
-            <i class="status__indicator--unread-message"></i>
-            <figure class="status__avatar">
-              <!-- <img src="http://1.gravatar.com/avatar/7ec0cac01b6d505b2bbb2951a722e202?size=80" /> -->
-              <img [src]="user?.image" [alt]="user?.name" class="avatar" />
-            </figure>
-            <div class="meta">
-              <div class="meta__name">{{user?.name}}</div>
-              <!-- <div class="meta__sub--dark">Hi there :)</div> -->
-            </div>
-          </div>
-        </li>
-        <!-- <li class="selected">
-          <div class="status">
-            <i class="status__indicator--replied-message"></i>
-            <figure class="status__avatar">
-              <img src="http://1.gravatar.com/avatar/34735b367f6bf8d5d2f38cb3d20d5e36?size=80" />
-            </figure>
-            <div class="meta">
-              <div class="meta__name">Tim Pietrusky</div>
-              <div class="meta__sub--dark">Browserhacks looks great!</div>
-            </div>
-          </div>
-        </li> -->
-      </ul>
-    </aside>
-    <section class="chat-view">
-      <header class="chat-view__header">
-        <div class="cf">
-          <div class="status">
-            <i class="status__indicator--online"></i>
-            <div class="meta">
-              <!-- <img [src]="selectedUser?.image" [alt]="selectedUser?.name" class="avatar" /> -->
-              <div class="meta__name">{{selectedUser?.name}}</div>
-              <!-- <div class="meta__sub--light">Adium that ass!</div> -->
-            </div>
-          </div>
-          <ul class="function-list">
-            <li class="icon-cloud"></li>
-            <li class="icon-clock"></li>
-            <li class="icon-dots"></li>
-          </ul>
-        </div>
-      </header>
-      <!-- {{messageArray | json}} -->
-      <section class="message-view chat-container">
-        <!-- <div class="message--send" *ngFor="let item of messageArray"
-          [ngClass]="item?.user === currentUser?.name && 'same-user'">
-          <div class="message__bubble--send">
-            {{item?.message}}
-          </div>
-          <figure class="message__avatar">
-            <img src="http://1.gravatar.com/avatar/89b9501f0f9e3020aab173f9a5a47683?size=80" />
-          </figure>
-        </div>
-        <div class="cf"></div> -->
-
-        <div class="chat-body">
-          <div *ngFor="let item of messageArray" [ngClass]="item?.user === currentUser?.name && 'same-user'">
-            <p class="message-container">{{item?.message}}</p>
-          </div>
-        </div>
-
-      </section>
-      <footer class="chat-view__input">
-        <div class="input"><input placeholder="Type a message" (keyup)="$event.keyCode === 13 && sendMessage()"
-            [(ngModel)]="messageText" /><span class="input__emoticon"></span></div>
-        <div class="status">
-          <!-- <figure class="status__avatar--small">
-                    <img src="http://1.gravatar.com/avatar/89b9501f0f9e3020aab173f9a5a47683?size=80" />
-                </figure> -->
-          <button (click)="sendMessage()">Send</button>
-        </div>
-      </footer>
-    </section>
-  </div>
-  <footer class="credit">
-    <a href="http://elpassion.pl/adium-concept/adium.html">Adium Concept</a> by <a
-      href="https://twitter.com/dliberadzki">Dawid Liberadzki</a> and <a href="https://twitter.com/oskar">Oskar
-      Krawczyk</a>. <br />Pure HTML/CSS3 Version by <a href="https://twitter.com/FWeinb">Fabrice Weinberg</a>
-  </footer>
 </div>
 
-<div class="" *ngIf="!showScreen">
-  <div class="scroll-down" *ngIf="!isOpened">SCROLL DOWN
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-      <path
-        d="M16 3C8.832031 3 3 8.832031 3 16s5.832031 13 13 13 13-5.832031 13-13S23.167969 3 16 3zm0 2c6.085938 0 11 4.914063 11 11 0 6.085938-4.914062 11-11 11-6.085937 0-11-4.914062-11-11C5 9.914063 9.914063 5 16 5zm-1 4v10.28125l-4-4-1.40625 1.4375L16 23.125l6.40625-6.40625L21 15.28125l-4 4V9z" />
-    </svg>
-  </div>
-
-  <div class="container"></div>
-
-  <div class="modal" [class.is-open]="isOpened">
-    <div class="modal-container">
-      <div class="modal-left">
-        <h1 class="modal-title">Login Here</h1>
-        <p class="modal-desc">Fanny pack hexagon food truck, street art waistcoat kitsch.</p>
-        <div class="input-block">
-          <label for="phone" class="input-label">Phone Number</label>
-          <input type="phone" name="phone" id="phone" placeholder="Enter your phone number" [(ngModel)]="phone" />
-        </div>
-        <!-- <div class="input-block">
-        <label for="password" class="input-label">Password</label>
-        <input type="password" name="password" id="password" placeholder="Password">
-      </div> -->
-        <div class="modal-buttons">
-          <!-- <a href="" class="">Forgot your password?</a> -->
-          <button class="input-button" (click)="login()">Login</button>
-        </div>
-        <!-- <p class="sign-up">Don't have an account? <a href="#">Sign up now</a></p> -->
-      </div>
-      <div class="modal-right">
-        <img
-          src="https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=dfd2ec5a01006fd8c4d7592a381d3776&auto=format&fit=crop&w=1000&q=80"
-          alt="">
-      </div>
-      <button class="icon-button close-button" (click)="closeModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
-          <path
-            d="M 25 3 C 12.86158 3 3 12.86158 3 25 C 3 37.13842 12.86158 47 25 47 C 37.13842 47 47 37.13842 47 25 C 47 12.86158 37.13842 3 25 3 z M 25 5 C 36.05754 5 45 13.94246 45 25 C 45 36.05754 36.05754 45 25 45 C 13.94246 45 5 36.05754 5 25 C 5 13.94246 13.94246 5 25 5 z M 16.990234 15.990234 A 1.0001 1.0001 0 0 0 16.292969 17.707031 L 23.585938 25 L 16.292969 32.292969 A 1.0001 1.0001 0 1 0 17.707031 33.707031 L 25 26.414062 L 32.292969 33.707031 A 1.0001 1.0001 0 1 0 33.707031 32.292969 L 26.414062 25 L 33.707031 17.707031 A 1.0001 1.0001 0 0 0 32.980469 15.990234 A 1.0001 1.0001 0 0 0 32.292969 16.292969 L 25 23.585938 L 17.707031 16.292969 A 1.0001 1.0001 0 0 0 16.990234 15.990234 z">
-          </path>
-        </svg>
-      </button>
-    </div>
-    <button class="modal-button" (click)="openModal()">Click here to login</button>
-  </div>
-</div>
+<app-login [showScreen] = "showScreen" (valueEmitter)="valueRecievedOutput($event)"></app-login>
