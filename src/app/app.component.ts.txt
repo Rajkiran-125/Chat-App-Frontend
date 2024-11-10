@@ -12,7 +12,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.9'
+  version: string = 'V.0.0.2'
 
   public roomId: string;
   public messageText: string;
@@ -67,7 +67,7 @@ export class AppComponent implements AfterViewChecked {
     },
     {
       id: 4,
-      name: 'Kamlesh',
+      name: 'Dianne Russell',
       phone: '20',
       image: 'https://bootdey.com/img/Content/avatar/avatar4.png',
       roomId: {
@@ -107,102 +107,21 @@ export class AppComponent implements AfterViewChecked {
     }
   }
 
-  // ngOnInit(): void {
-  //   this.startTimer();
-  
-  //   // Subscribe to new messages and update message array and local storage only once per message
-  //   this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string }) => {
-  //     if (data.room === this.roomId) {
-  //       const newMessage = {
-  //         user: data.user,
-  //         message: data.message,
-  //         dateTime: new Date().toISOString()
-  //       };
-  
-  //       // Add the message to the messageArray for display
-  //       this.messageArray.push(newMessage);
-  
-  //       // Check for duplication before updating storage
-  //       this.updateStorageIfNotExists(newMessage);
-  
-  //       // Scroll to the bottom after adding the message
-  //       setTimeout(() => this.scrollToBottom(), 100);
-  //     }
-  //   });
-  
-  //   // Load existing messages from storage when component initializes
-  //   this.loadMessagesFromStorage();
-  // }
-
   ngOnInit(): void {
     this.startTimer();
-  
-    // Subscribe to new messages, but only process them if they match the current roomId
-    this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string, dateTime: string }) => {
-      // Ensure the incoming message is for the selected user's room
-      if (data.room === this.roomId) {
-        const newMessage = {
-          user: data.user,
-          message: data.message,
-          dateTime: data.dateTime
-        };
-  
-        // Add the message to the messageArray and update storage
-        this.messageArray.push(newMessage);
-        this.updateStorageIfNotExists(newMessage, data.room);
-  
-        // Scroll to the bottom after adding the message
-        setTimeout(() => this.scrollToBottom(), 100);
-      }else{
-        const newMessage = {
-          user: data.user,
-          message: data.message,
-          dateTime: data.dateTime
-        };
-        this.updateStorageIfNotExists(newMessage,data.room);
-      }
-    });
-  
-    // Load existing messages from storage when component initializes
-    this.loadMessagesFromStorage();
-  }
-  
-  loadMessagesFromStorage(): void {
-    this.storageArray = this.chatService.getStorage();
-    const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
-  
-    // If roomId exists in storage, set messageArray to its chats
-    if (storeIndex > -1) {
-      this.messageArray = this.storageArray[storeIndex].chats;
-    } else {
-      this.messageArray = []; // Clear messages if no matching roomId is found
-    }
-  
-    // Scroll to the bottom after loading messages
-    setTimeout(() => this.scrollToBottom(), 100);
-  }
-  
-  updateStorageIfNotExists(newMessage: { user: string; message: string; dateTime: string },roomId): void {
-    const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === roomId);
-  
-    if (storeIndex > -1) {
-      // Check for duplicate messages by matching message content and dateTime
-      const exists = this.storageArray[storeIndex].chats.some(
-        (chat) => chat.message === newMessage.message && chat.dateTime === newMessage.dateTime
-      );
-      if (!exists) {
-        this.storageArray[storeIndex].chats.push(newMessage); // Add if not duplicate
-      }
-    } else {
-      // Create a new room entry if roomId is not found
-      this.storageArray.push({
-        roomId: this.roomId,
-        chats: [newMessage]
+    this.chatService.getMessage()
+      .subscribe((data: { user: string, room: string, message: string }) => {
+        // this.messageArray.push(data);
+        if (this.roomId) {
+          setTimeout(() => {
+            this.storageArray = this.chatService.getStorage();
+            const storeIndex = this.storageArray
+              .findIndex((storage) => storage.roomId === this.roomId);
+            this.messageArray = this.storageArray[storeIndex].chats;
+          }, 500);
+        }
       });
-    }
-  
-    // Update localStorage with the new state
-    this.chatService.setStorage(this.storageArray);
+    this.scrollToBottom();
   }
 
   valueRecievedOutput(value) {
@@ -258,13 +177,10 @@ export class AppComponent implements AfterViewChecked {
 
     if (!this.messageText.trim()) return;
 
-    const date = this.dateTime.toISOString()
-
     this.chatService.sendMessage({
       user: this.currentUser.name,
       room: this.roomId,
-      message: this.messageText,
-      dateTime: date
+      message: this.messageText
     });
 
     if (this.replyText.trim()) {
@@ -278,7 +194,7 @@ export class AppComponent implements AfterViewChecked {
     const newMessage = {
       user: this.currentUser.name,
       message: this.messageText,
-      dateTime: date
+      dateTime: this.dateTime
     };
 
     if (storeIndex > -1) {

@@ -6,22 +6,11 @@
         <div>{{currentUser.name}} <br> m-hollaway&#64;gmail.com</div>
       </div>
 
-      <div class="p-15">
-        <div class="dropdown">
-          <a class="btn btn-primary btn-block" data-toggle="dropdown">Messages <i class="caret m-l-5"></i></a>
-
-          <ul class="dropdown-menu dm-icon w-100">
-            <li><a ><i class="fa fa-envelope"></i> Messages</a></li>
-            <li><a ><i class="fa fa-users"></i> Contacts</a></li>
-            <li><a ><i class="fa fa-format-list-bulleted"> </i>Todo Lists</a></li>
-          </ul>
-        </div>
-      </div>
 
       <div class="list-group lg-alt">
         <!-- {{selectedUser | json}} -->
-        <a class="list-group-item media" [ngClass]="user?.phone === selectedUser?.phone && 'active'" *ngFor="let user of userList"
-          (click)="selectUserHandler(user?.phone)">
+        <a class="list-group-item media" [ngClass]="user?.phone === selectedUser?.phone && 'active'"
+          *ngFor="let user of userList" (click)="selectUserHandler(user?.phone); toggleMenu()">
           <div class="pull-left">
             <img [src]="user.image" alt="" class="img-avatar">
           </div>
@@ -31,18 +20,12 @@
           </div>
         </a>
 
-        <!-- <a class="list-group-item media" href="">
-          <div class="pull-left">
-            <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
-          </div>
-          <div class="media-body">
-            <div class="list-group-item-heading">Ann Watkinson</div>
-            <small class="list-group-item-text c-gray">Cum sociis natoque penatibus </small>
-          </div>
-        </a> -->
-
       </div>
-
+      <!-- footer -->
+      <div class="ms-footer">
+        <!-- <button (click)="toggleMenu()">Toggle Menu</button> -->
+        <small>This project is made with <i class="fa-solid fa-heart" style="color: red;"></i> by <br> <a href="https://rajkiranjaiswar.com" target="_blank">Rajkiran Jaiswar</a></small>
+      </div>
 
     </div>
 
@@ -52,16 +35,20 @@
           <i class="fa fa-bars"></i>
         </div>
 
-        <div class="pull-left hidden-xs" *ngIf="selectedUser" >
+        <div class="pull-left hidden-xs" *ngIf="selectedUser">
           <img [src]="selectedUser?.image" alt="" class="img-avatar m-r-10">
           <div class="lv-avatar pull-left">
 
           </div>
           <span>{{selectedUser.name}}</span>
         </div>
-
+        <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
         <ul class="ah-actions actions">
           <li>
+            <span>{{version}}</span>
+
+          </li>
+          <!-- <li>
             <a href="">
               <i class="fa fa-trash"></i>
             </a>
@@ -103,24 +90,30 @@
                 <a href="">Message Settings</a>
               </li>
             </ul>
-          </li>
+          </li> -->
         </ul>
       </div>
-      <div class="msg-body">
-        {{messageArray | json}}
-        <div class="message-feed " *ngFor="let item of messageArray" [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
-          <!-- <div class="pull-left">
+
+      <div class="chat-box" *ngIf="selectedUser">
+
+
+        <div class="msg-body" #msgBody>
+          <!-- {{messageArray | json}} -->
+          <div class="message-feed " *ngFor="let item of messageArray"
+            [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
+            <!-- <div class="pull-left">
             <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
           </div> -->
-          <div class="media-body">
-            <div class="mf-content">
-              {{item?.message}}
+            <div class="media-body">
+              <div class="mf-content">
+                {{item?.message}}
+              </div>
+              <small class="mf-date"><i class="fa fa-clock-o"></i> {{item.dateTime | date: "hh:mm:ss
+                dd:MM:yyyy"}}</small>
             </div>
-            <small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:00</small>
           </div>
-        </div>
 
-        <!-- <div class="message-feed right">
+          <!-- <div class="message-feed right">
           <div class="pull-right">
             <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
           </div>
@@ -134,16 +127,23 @@
         </div> -->
 
 
-      </div>
+        </div>
 
-      <div class="msb-reply">
-        <!-- <textarea placeholder="What's on your mind..."></textarea> -->
-        <input type="text" placeholder="Type a message" class="form-control" [(ngModel)]="messageText"
-        (keyup)="$event.keyCode === 13 && sendMessage()" />
-        <button (click)="sendMessage()"><i class="fa fa-paper-plane-o"></i></button>
+        <div class="msb-reply">
+          <!-- <textarea placeholder="What's on your mind..."></textarea> -->
+          <input type="text" placeholder="Type a message" class="form-control" [(ngModel)]="messageText"
+            (keyup)="$event.keyCode === 13 && sendMessage()" />
+          <button (click)="messageText !== '' ? sendMessage() : ''"><i class="fa fa-paper-plane-o"></i></button>
+        </div>
+
+      </div>
+      <div class="msg-body" *ngIf="!selectedUser ">
+        <div class="user-notSelected">
+          <span>Please select user to chat</span>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<app-login [showScreen] = "showScreen" (valueEmitter)="valueRecievedOutput($event)"></app-login>
+<app-login [showScreen]="showScreen" (valueEmitter)="valueRecievedOutput($event)"></app-login>
