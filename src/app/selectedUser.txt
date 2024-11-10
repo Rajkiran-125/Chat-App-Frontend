@@ -137,9 +137,9 @@ export class AppComponent implements AfterViewChecked {
   ngOnInit(): void {
     this.startTimer();
   
-    // Subscribe to new messages, processing only those matching the current roomId
+    // Subscribe to new messages, but only process them if they match the current roomId
     this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string }) => {
-      // Only process messages for the selected user's room
+      // Ensure the incoming message is for the selected user's room
       if (data.room === this.roomId) {
         const newMessage = {
           user: data.user,
@@ -147,7 +147,7 @@ export class AppComponent implements AfterViewChecked {
           dateTime: new Date().toISOString()
         };
   
-        // Add the message to messageArray and update local storage if not a duplicate
+        // Add the message to the messageArray and update storage
         this.messageArray.push(newMessage);
         this.updateStorageIfNotExists(newMessage);
   
@@ -156,7 +156,7 @@ export class AppComponent implements AfterViewChecked {
       }
     });
   
-    // Load existing messages from storage on component initialization
+    // Load existing messages from storage when component initializes
     this.loadMessagesFromStorage();
   }
   
