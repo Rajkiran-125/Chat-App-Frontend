@@ -12,7 +12,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.2'
+  version: string = 'V.0.0.8'
 
   public roomId: string;
   public messageText: string;
@@ -137,26 +137,33 @@ export class AppComponent implements AfterViewChecked {
   ngOnInit(): void {
     this.startTimer();
   
-    // Subscribe to new messages, processing only those matching the current roomId
-    this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string }) => {
-      // Only process messages for the selected user's room
+    // Subscribe to new messages, but only process them if they match the current roomId
+    this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string, dateTime: string }) => {
+      // Ensure the incoming message is for the selected user's room
       if (data.room === this.roomId) {
         const newMessage = {
           user: data.user,
           message: data.message,
-          dateTime: new Date().toISOString()
+          dateTime: data.dateTime
         };
   
-        // Add the message to messageArray and update local storage if not a duplicate
+        // Add the message to the messageArray and update storage
         this.messageArray.push(newMessage);
-        this.updateStorageIfNotExists(newMessage);
+        this.updateStorageIfNotExists(newMessage, data.room);
   
         // Scroll to the bottom after adding the message
         setTimeout(() => this.scrollToBottom(), 100);
+      }else{
+        const newMessage = {
+          user: data.user,
+          message: data.message,
+          dateTime: data.dateTime
+        };
+        this.updateStorageIfNotExists(newMessage,data.room);
       }
     });
   
-    // Load existing messages from storage on component initialization
+    // Load existing messages from storage when component initializes
     this.loadMessagesFromStorage();
   }
   
@@ -175,8 +182,8 @@ export class AppComponent implements AfterViewChecked {
     setTimeout(() => this.scrollToBottom(), 100);
   }
   
-  updateStorageIfNotExists(newMessage: { user: string; message: string; dateTime: string }): void {
-    const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
+  updateStorageIfNotExists(newMessage: { user: string; message: string; dateTime: string },roomId): void {
+    const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === roomId);
   
     if (storeIndex > -1) {
       // Check for duplicate messages by matching message content and dateTime
@@ -251,10 +258,13 @@ export class AppComponent implements AfterViewChecked {
 
     if (!this.messageText.trim()) return;
 
+    const date = this.dateTime.toISOString()
+
     this.chatService.sendMessage({
       user: this.currentUser.name,
       room: this.roomId,
-      message: this.messageText
+      message: this.messageText,
+      dateTime: date
     });
 
     if (this.replyText.trim()) {
@@ -268,7 +278,7 @@ export class AppComponent implements AfterViewChecked {
     const newMessage = {
       user: this.currentUser.name,
       message: this.messageText,
-      dateTime: this.dateTime
+      dateTime: date
     };
 
     if (storeIndex > -1) {
