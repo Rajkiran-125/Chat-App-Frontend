@@ -20,7 +20,7 @@ body {
   left: 0;
   top: 0;
   border-right: 1px solid #eee;
-  padding-bottom: 50px;
+  // padding-bottom: 50px;
   height: 100%;
   width: 240px;
   background: #fff;
@@ -116,7 +116,7 @@ body {
   box-shadow: 0 -20px 20px -5px #fff;
   position: relative;
   // margin-top: 30px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #ddd;
   background: #f8f8f8;
   padding: 10px;
   input{
@@ -250,5 +250,33 @@ body {
     font-size: 1em; /* Smaller font size for mobile */
     padding: 0 10px; /* Add padding for smaller screens */
     height: 70vh; /* Full height to center vertically */
+  }
+}
+
+.ms-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Take up full height of the parent container */
+}
+
+.ms-user {
+  flex-grow: 0; /* Prevent user section from growing */
+}
+
+.list-group {
+  flex-grow: 1; /* Allow the list to take available space */
+  overflow-y: auto; /* Make list scrollable if it's too long */
+}
+
+.ms-footer {
+  flex-grow: 0; /* Prevent footer from growing */
+  padding: 4px;
+  background-color: #f1f1f1;
+  text-align: center;
+  border-top: 1px solid #ddd;
+  small{
+    a{
+      text-decoration: none;
+    }
   }
 }

@@ -6,17 +6,6 @@
         <div>{{currentUser.name}} <br> m-hollaway&#64;gmail.com</div>
       </div>
 
-      <div class="p-15">
-        <div class="dropdown">
-          <a class="btn btn-primary btn-block" data-toggle="dropdown">Messages <i class="caret m-l-5"></i></a>
-
-          <ul class="dropdown-menu dm-icon w-100">
-            <li><a><i class="fa fa-envelope"></i> Messages</a></li>
-            <li><a><i class="fa fa-users"></i> Contacts</a></li>
-            <li><a><i class="fa fa-format-list-bulleted"> </i>Todo Lists</a></li>
-          </ul>
-        </div>
-      </div>
 
       <div class="list-group lg-alt">
         <!-- {{selectedUser | json}} -->
@@ -31,18 +20,12 @@
           </div>
         </a>
 
-        <!-- <a class="list-group-item media" href="">
-          <div class="pull-left">
-            <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" class="img-avatar">
-          </div>
-          <div class="media-body">
-            <div class="list-group-item-heading">Ann Watkinson</div>
-            <small class="list-group-item-text c-gray">Cum sociis natoque penatibus </small>
-          </div>
-        </a> -->
-
       </div>
-
+      <!-- footer -->
+      <div class="ms-footer">
+        <!-- <button (click)="toggleMenu()">Toggle Menu</button> -->
+        <small>This project is made with <i class="fa-solid fa-heart" style="color: red;"></i> by <br> <a href="https://rajkiranjaiswar.com" target="_blank">Rajkiran Jaiswar</a></small>
+      </div>
 
     </div>
 
@@ -63,10 +46,9 @@
         <ul class="ah-actions actions">
           <li>
             <span>{{version}}</span>
-            <!-- <a href="">
-            </a> -->
+
           </li>
-          <li>
+          <!-- <li>
             <a href="">
               <i class="fa fa-trash"></i>
             </a>
@@ -108,7 +90,7 @@
                 <a href="">Message Settings</a>
               </li>
             </ul>
-          </li>
+          </li> -->
         </ul>
       </div>
 
@@ -116,7 +98,7 @@
 
 
         <div class="msg-body" #msgBody>
-          {{messageArray | json}}
+          <!-- {{messageArray | json}} -->
           <div class="message-feed " *ngFor="let item of messageArray"
             [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
             <!-- <div class="pull-left">
@@ -126,7 +108,8 @@
               <div class="mf-content">
                 {{item?.message}}
               </div>
-              <small class="mf-date"><i class="fa fa-clock-o"></i> {{item.dateTime | date: "hh:mm:ss dd:MM:yyyy"}}</small>
+              <small class="mf-date"><i class="fa fa-clock-o"></i> {{item.dateTime | date: "hh:mm:ss
+                dd:MM:yyyy"}}</small>
             </div>
           </div>
 

@@ -12,7 +12,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.8'
+  version: string = 'V.0.0.9'
 
   public roomId: string;
   public messageText: string;
@@ -67,7 +67,7 @@ export class AppComponent implements AfterViewChecked {
     },
     {
       id: 4,
-      name: 'Dianne Russell',
+      name: 'Kamlesh',
       phone: '20',
       image: 'https://bootdey.com/img/Content/avatar/avatar4.png',
       roomId: {
