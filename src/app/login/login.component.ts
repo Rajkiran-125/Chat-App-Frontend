@@ -1,4 +1,5 @@
 import { Component, HostListener, Input, EventEmitter, Output } from '@angular/core';
+import { ApiService } from '../service/api.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,18 @@ export class LoginComponent {
   @Output() valueEmitter = new EventEmitter<any>(); // Event emitter to send phone to parent
 
   @Input() showScreen;
+
+  constructor(
+    private api: ApiService
+  ) {
+  }
+
+  ngOnInit(): void {
+    
+  }
+
+
+  
 
   login() {
     // Emit the phone number to the parent component

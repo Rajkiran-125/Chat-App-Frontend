@@ -1,5 +1,8 @@
 import { Component, HostListener, ViewChild, AfterViewChecked, ElementRef, OnDestroy } from '@angular/core';
 import { ChatService } from './service/chat.service';
+import { ApiService } from './service/api.service';
+import { lastValueFrom } from 'rxjs';
+
 
 @Component({
   selector: 'app-root',
@@ -14,9 +17,9 @@ export class AppComponent implements AfterViewChecked {
   isOpened = false;
   version: string = 'V.0.0.9'
 
-  public roomId: string;
+  public roomId: any;
   public messageText: string;
-  public messageArray: { user: string, message: string, dateTime: string }[] = [];
+  public messageArray: { UserName: string, message: string, dateTime: string }[] = [];
   private storageArray = [];
 
   public showScreen = false;
@@ -31,55 +34,59 @@ export class AppComponent implements AfterViewChecked {
   menuToggled = true;
   replyText = '';
 
-  public userList = [
-    {
-      id: 1,
-      name: 'Rajkiran Jaiswar',
-      phone: '8286231170',
-      image: 'https://bootdey.com/img/Content/avatar/avatar1.png',
-      roomId: {
-        2: 'room-1',
-        3: 'room-4',
-        4: 'room-3'
-      }
-    },
-    {
-      id: 2,
-      name: 'Mohit',
-      phone: '18',
-      image: 'https://bootdey.com/img/Content/avatar/avatar2.png',
-      roomId: {
-        1: 'room-1',
-        3: 'room-2',
-        4: 'room-5'
-      }
-    },
-    {
-      id: 3,
-      name: 'Neha',
-      phone: '10',
-      image: 'https://bootdey.com/img/Content/avatar/avatar3.png',
-      roomId: {
-        1: 'room-4',
-        2: 'room-2',
-        4: 'room-6'
-      }
-    },
-    {
-      id: 4,
-      name: 'Kamlesh',
-      phone: '20',
-      image: 'https://bootdey.com/img/Content/avatar/avatar4.png',
-      roomId: {
-        1: 'room-3',
-        2: 'room-5',
-        3: 'room-6'
-      }
-    }
-  ];
+  userList: any;
+  roomIdDetails: any;
+
+  // public userList = [
+  //   {
+  //     id: 1,
+  //     UserName: 'Rajkiran Jaiswar',
+  //     phone: '8286231170',
+  //     ProfilePic: 'https://bootdey.com/img/Content/avatar/avatar1.png',
+  //     roomId: {
+  //       2: 'room-1',
+  //       3: 'room-4',
+  //       4: 'room-3'
+  //     }
+  //   },
+  //   {
+  //     id: 2,
+  //     UserName: 'Mohit',
+  //     phone: '18',
+  //     ProfilePic: 'https://bootdey.com/img/Content/avatar/avatar2.png',
+  //     roomId: {
+  //       1: 'room-1',
+  //       3: 'room-2',
+  //       4: 'room-5'
+  //     }
+  //   },
+  //   {
+  //     id: 3,
+  //     UserName: 'Neha',
+  //     phone: '10',
+  //     ProfilePic: 'https://bootdey.com/img/Content/avatar/avatar3.png',
+  //     roomId: {
+  //       1: 'room-4',
+  //       2: 'room-2',
+  //       4: 'room-6'
+  //     }
+  //   },
+  //   {
+  //     id: 4,
+  //     UserName: 'Kamlesh',
+  //     phone: '20',
+  //     ProfilePic: 'https://bootdey.com/img/Content/avatar/avatar4.png',
+  //     roomId: {
+  //       1: 'room-3',
+  //       2: 'room-5',
+  //       3: 'room-6'
+  //     }
+  //   }
+  // ];
 
   constructor(
-    private chatService: ChatService
+    private chatService: ChatService,
+    private api: ApiService
   ) {
   }
 
@@ -107,84 +114,81 @@ export class AppComponent implements AfterViewChecked {
     }
   }
 
-  // ngOnInit(): void {
-  //   this.startTimer();
-  
-  //   // Subscribe to new messages and update message array and local storage only once per message
-  //   this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string }) => {
-  //     if (data.room === this.roomId) {
-  //       const newMessage = {
-  //         user: data.user,
-  //         message: data.message,
-  //         dateTime: new Date().toISOString()
-  //       };
-  
-  //       // Add the message to the messageArray for display
-  //       this.messageArray.push(newMessage);
-  
-  //       // Check for duplication before updating storage
-  //       this.updateStorageIfNotExists(newMessage);
-  
-  //       // Scroll to the bottom after adding the message
-  //       setTimeout(() => this.scrollToBottom(), 100);
-  //     }
-  //   });
-  
-  //   // Load existing messages from storage when component initializes
-  //   this.loadMessagesFromStorage();
-  // }
-
   ngOnInit(): void {
     this.startTimer();
-  
+    this.getUserList();
+
     // Subscribe to new messages, but only process them if they match the current roomId
-    this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string, dateTime: string }) => {
-      // Ensure the incoming message is for the selected user's room
+    this.chatService.getMessage().subscribe((data: { UserName: string; room: string; message: string, dateTime: string }) => {
+      // Ensure the incoming message is for the selected UserName's room
       if (data.room === this.roomId) {
         const newMessage = {
-          user: data.user,
+          UserName: data.UserName,
           message: data.message,
           dateTime: data.dateTime
         };
-  
+
         // Add the message to the messageArray and update storage
         this.messageArray.push(newMessage);
         this.updateStorageIfNotExists(newMessage, data.room);
-  
+
         // Scroll to the bottom after adding the message
         setTimeout(() => this.scrollToBottom(), 100);
-      }else{
+      } else {
         const newMessage = {
-          user: data.user,
+          UserName: data.UserName,
           message: data.message,
           dateTime: data.dateTime
         };
-        this.updateStorageIfNotExists(newMessage,data.room);
+        this.updateStorageIfNotExists(newMessage, data.room);
       }
     });
-  
+
     // Load existing messages from storage when component initializes
     this.loadMessagesFromStorage();
   }
-  
+
+  getUserList() {
+    let obj = {
+      "data": {
+        "spname": "sp_ca_getUserList",
+        "parameters": {
+        }
+      }
+    }
+    this.api.post('index/json', obj).subscribe(res => {
+      if (res['code'] == 200) {
+        if (res['results'].data && res['results'].data.length > 0) {
+          this.userList = res['results'].data;
+          localStorage.setItem('userList', JSON.stringify(res['results'].data));
+        } else {
+
+        }
+      } else {
+        console.log('UserName data get Failed >>>>>')
+      }
+      console.log('UserName data get >>>>>>', res);
+    })
+  }
+
   loadMessagesFromStorage(): void {
     this.storageArray = this.chatService.getStorage();
     const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
-  
+
     // If roomId exists in storage, set messageArray to its chats
     if (storeIndex > -1) {
       this.messageArray = this.storageArray[storeIndex].chats;
     } else {
       this.messageArray = []; // Clear messages if no matching roomId is found
     }
-  
+
     // Scroll to the bottom after loading messages
     setTimeout(() => this.scrollToBottom(), 100);
   }
-  
-  updateStorageIfNotExists(newMessage: { user: string; message: string; dateTime: string },roomId): void {
+
+  updateStorageIfNotExists(newMessage: { UserName: string; message: string; dateTime: string }, roomId): void {
     const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === roomId);
-  
+
     if (storeIndex > -1) {
       // Check for duplicate messages by matching message content and dateTime
       const exists = this.storageArray[storeIndex].chats.some(
@@ -200,7 +204,7 @@ export class AppComponent implements AfterViewChecked {
         chats: [newMessage]
       });
     }
-  
+
     // Update localStorage with the new state
     this.chatService.setStorage(this.storageArray);
   }
@@ -218,22 +222,56 @@ export class AppComponent implements AfterViewChecked {
 
   login(): void {
 
-    this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
-    this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
-    this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
+    this.currentUser = this.userList.find(UserName => UserName.Phone === this.phone.toString());
+    this.loginUser = this.userList.filter((UserName) => UserName.Phone == this.phone.toString());
+    this.userList = this.userList.filter((UserName) => UserName.Phone !== this.phone.toString());
 
     console.log(this.loginUser);
     if (this.currentUser) {
       this.showScreen = true;
       console.log('this.showScreen', this.showScreen)
     }
-
   }
 
-  selectUserHandler(phone: string): void {
+  async getRoomId(userId,selectedUserId) {
+    const obj = {
+      "data": {
+        "spname": "sp_ca_getRoomId",
+        "parameters": {
+          "UserId": userId,
+          "selectedUserId":selectedUserId
+        }
+      }
+    };
+  
+    try {
+      const res = await lastValueFrom(this.api.post('index/json', obj));
+      if (res['code'] === 200) {
+        if (res['results'].data && res['results'].data.length > 0) {
+          return res['results'].data[0].RoomId;
+        } else {
+          console.log('Room Id res Path is changed');
+        }
+      } else {
+        console.log('UserName data get Failed >>>>>');
+      }
+      console.log('UserName data get >>>>>>', res);
+      return null;
+    } catch (error) {
+      console.error('API call failed', error);
+      return null;
+    }
+  }
+  
 
-    this.selectedUser = this.userList.find(user => user.phone === phone);
-    this.roomId = this.selectedUser.roomId[this.currentUser.id];
+  async selectUserHandler(Phone: string) {
+    console.log('this.userlist >>>>>', this.userList)
+    this.selectedUser = this.userList.find(UserName => UserName.Phone === Phone);
+    console.log('this.selectedUser >>>>', this.selectedUser)
+    console.log('this.loginUser >>>>', this.loginUser)
+    
+    this.roomId = await this.getRoomId(this.loginUser[0].Id, this.selectedUser.Id);
+    console.log('this.roomId >>>>', this.roomId)
     this.messageArray = [];
 
     this.storageArray = this.chatService.getStorage();
@@ -243,11 +281,11 @@ export class AppComponent implements AfterViewChecked {
     if (storeIndex > -1) {
       this.messageArray = this.storageArray[storeIndex].chats;
     }
-    this.join(this.currentUser.name, this.roomId);
+    this.join(this.currentUser.UserName, this.roomId);
   }
 
-  join(username: string, roomId: string): void {
-    this.chatService.joinRoom({ user: username, room: roomId });
+  join(userUserName: string, roomId: string): void {
+    this.chatService.joinRoom({ UserName: userUserName, room: roomId });
     setTimeout(() => {
       this.scrollToBottom();
     }, 10);
@@ -261,7 +299,7 @@ export class AppComponent implements AfterViewChecked {
     const date = this.dateTime.toISOString()
 
     this.chatService.sendMessage({
-      user: this.currentUser.name,
+      UserName: this.currentUser.UserName,
       room: this.roomId,
       message: this.messageText,
       dateTime: date
@@ -276,7 +314,7 @@ export class AppComponent implements AfterViewChecked {
     const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
 
     const newMessage = {
-      user: this.currentUser.name,
+      UserName: this.currentUser.UserName,
       message: this.messageText,
       dateTime: date
     };
