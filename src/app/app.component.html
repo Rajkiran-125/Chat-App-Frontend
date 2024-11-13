@@ -2,21 +2,20 @@
   <div class="tile tile-alt" id="messages-main">
     <div class="ms-menu" [class.toggled]="menuToggled">
       <div class="ms-user clearfix">
-        <img [src]="currentUser?.ProfilePic" alt="" class="img-avatar pull-left">
-        <div>{{currentUser?.UserName}} <br> m-hollaway&#64;gmail.com</div>
+        <img [src]="currentUser?.image" alt="" class="img-avatar pull-left">
+        <div>{{currentUser?.name}} <br> m-hollaway&#64;gmail.com</div>
       </div>
 
 
       <div class="list-group lg-alt">
-        {{userList[0].Phone}}
-        <a class="list-group-item media" [ngClass]="user?.Phone === selectedUser?.Phone && 'active'"
-          *ngFor="let user of userList" (click)="selectUserHandler(user?.Phone); toggleMenu()">
+        <!-- {{selectedUser | json}} -->
+        <a class="list-group-item media" [ngClass]="user?.phone === selectedUser?.phone && 'active'"
+          *ngFor="let user of userList" (click)="selectUserHandler(user?.phone); toggleMenu()">
           <div class="pull-left">
-            <img [src]="user.ProfilePic" alt="" class="img-avatar">
+            <img [src]="user?.image" alt="" class="img-avatar">
           </div>
           <div class="media-body">
-            <small class="list-group-item-heading">{{user?.UserName}}</small>
-            <small>{{user.Phone}}</small>
+            <small class="list-group-item-heading">{{user?.name}}</small>
             <!-- <small class="list-group-item-text c-gray">Fierent fastidii recteque ad pro</small> -->
           </div>
         </a>
@@ -37,11 +36,11 @@
         </div>
 
         <div class="pull-left hidden-xs" *ngIf="selectedUser">
-          <img [src]="selectedUser?.ProfilePic" alt="" class="img-avatar m-r-10">
+          <img [src]="selectedUser?.image" alt="" class="img-avatar m-r-10">
           <div class="lv-avatar pull-left">
 
           </div>
-          <span>{{selectedUser?.UserName}}</span>
+          <span>{{selectedUser.name}}</span>
         </div>
         <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
         <ul class="ah-actions actions">
@@ -99,14 +98,16 @@
 
 
         <div class="msg-body" #msgBody>
-          messageArray :{{messageArray | json}}
+          {{currentUser | json}}
           <br>
-          currentUser : {{currentUser | json}}
+          <br>
+          {{messageArray | json}}
           <div class="message-feed " *ngFor="let item of messageArray"
-            [ngClass]="item?.UserName === currentUser?.UserName ? 'right' : 'media'">
+            [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
             <!-- <div class="pull-left">
-            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
-          </div> -->
+              <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
+            </div> -->
+            {{item?.user}} , {{currentUser?.name}}
             <div class="media-body">
               <div class="mf-content">
                 {{item?.message}}

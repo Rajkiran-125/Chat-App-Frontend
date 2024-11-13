@@ -10,6 +10,22 @@ export class LoginComponent {
 
   isOpened = false;
   phone: any;
+  tab: string = 'login';
+
+  userName;
+  phoneNumber;
+  selectedProfilePic: string | null = null;
+
+  profilePics = [
+    'https://bootdey.com/img/Content/avatar/avatar1.png',
+    'https://bootdey.com/img/Content/avatar/avatar2.png',
+    'https://bootdey.com/img/Content/avatar/avatar3.png',
+    'https://bootdey.com/img/Content/avatar/avatar4.png',
+    'https://bootdey.com/img/Content/avatar/avatar5.png',
+    'https://bootdey.com/img/Content/avatar/avatar6.png'
+  ]
+
+
 
   @Output() valueEmitter = new EventEmitter<any>(); // Event emitter to send phone to parent
 
@@ -17,7 +33,34 @@ export class LoginComponent {
 
   constructor(
     private api: ApiService
-  ) {
+  ) {}
+
+  selectProfilePic(img: string) {
+    this.selectedProfilePic = img;
+    console.log("this.selectProfilePic", this.selectProfilePic)
+  }
+
+  signUp() {
+    console.log('signUp');
+    let json_data ={
+      userName: this.userName,
+      phone: this.phoneNumber,
+      profilePic: this.selectedProfilePic
+    }
+    let obj = {
+      "data": {
+        "spname": "sp_ca_signUpUser",
+        "parameters": {
+          "json_data": json_data
+        }
+      }
+    };
+
+    this.api.post('index/json', obj).subscribe(res => {
+      console.log(res['results'].data[0].results);
+      alert(res['results'].data[0].results);
+      this.tab = 'login'
+    });
   }
 
   ngOnInit(): void {
@@ -25,7 +68,7 @@ export class LoginComponent {
   }
 
 
-  
+
 
   login() {
     // Emit the phone number to the parent component
