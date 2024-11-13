@@ -15,6 +15,7 @@ export class AppComponent implements AfterViewChecked {
 
   isOpened = false;
   version: string = 'V.0.0.9'
+  search: any;
 
   public roomId: string;
   public messageText: string;
@@ -29,7 +30,7 @@ export class AppComponent implements AfterViewChecked {
   previousMessageCount = 0;
   dateTime = new Date();
   private timer: any;
-  userList:any;
+  userList: any;
   menuToggled = true;
   replyText = '';
 
@@ -110,7 +111,7 @@ export class AppComponent implements AfterViewChecked {
     }
   }
 
- 
+
   ngOnInit(): void {
     this.startTimer();
     // this.getUserList();
@@ -124,28 +125,28 @@ export class AppComponent implements AfterViewChecked {
           message: data.message,
           dateTime: data.dateTime
         };
-  
+
         // Add the message to the messageArray and update storage
         this.messageArray.push(newMessage);
         this.updateStorageIfNotExists(newMessage, data.room);
-  
+
         // Scroll to the bottom after adding the message
         setTimeout(() => this.scrollToBottom(), 100);
-      }else{
+      } else {
         const newMessage = {
           user: data.user,
           message: data.message,
           dateTime: data.dateTime
         };
-        this.updateStorageIfNotExists(newMessage,data.room);
+        this.updateStorageIfNotExists(newMessage, data.room);
       }
     });
-  
+
     // Load existing messages from storage when component initializes
     this.loadMessagesFromStorage();
   }
 
-  getUserList(){
+  getUserList() {
     let obj = {
       "data": {
         "spname": "sp_ca_getUserList",
@@ -159,7 +160,7 @@ export class AppComponent implements AfterViewChecked {
           this.userList = res['results'].data;
           localStorage.setItem('userList', JSON.stringify(res['results'].data));
         } else {
-          
+
         }
       } else {
         console.log('User data get Failed >>>>>')
@@ -173,12 +174,11 @@ export class AppComponent implements AfterViewChecked {
       "data": {
         "spname": "sp_ca_getUserList",
         "parameters": {
-          "flag": "withPhone",
-          "phone": '8286231170'
+          "flag": "withPhone"
         }
       }
     };
-  
+
     this.api.post('index/json', obj).subscribe(res => {
 
       // {
@@ -211,9 +211,10 @@ export class AppComponent implements AfterViewChecked {
               userList[item.UserId].roomId[item.RoomUserId] = item.RoomId;
             }
           });
-  
+
           this.userList = Object.values(userList);
           localStorage.setItem('userList', JSON.stringify(this.userList));
+          this.login();
         }
       } else {
         console.log('UserName data get Failed >>>>>');
@@ -221,25 +222,25 @@ export class AppComponent implements AfterViewChecked {
       console.log('UserName data get >>>>>>', res);
     });
   }
-  
+
   loadMessagesFromStorage(): void {
     this.storageArray = this.chatService.getStorage();
     const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
-  
+
     // If roomId exists in storage, set messageArray to its chats
     if (storeIndex > -1) {
       this.messageArray = this.storageArray[storeIndex].chats;
     } else {
       this.messageArray = []; // Clear messages if no matching roomId is found
     }
-  
+
     // Scroll to the bottom after loading messages
     setTimeout(() => this.scrollToBottom(), 100);
   }
-  
-  updateStorageIfNotExists(newMessage: { user: string; message: string; dateTime: string },roomId): void {
+
+  updateStorageIfNotExists(newMessage: { user: string; message: string; dateTime: string }, roomId): void {
     const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === roomId);
-  
+
     if (storeIndex > -1) {
       // Check for duplicate messages by matching message content and dateTime
       const exists = this.storageArray[storeIndex].chats.some(
@@ -255,7 +256,7 @@ export class AppComponent implements AfterViewChecked {
         chats: [newMessage]
       });
     }
-  
+
     // Update localStorage with the new state
     this.chatService.setStorage(this.storageArray);
   }
@@ -282,6 +283,10 @@ export class AppComponent implements AfterViewChecked {
       this.showScreen = true;
       console.log('this.showScreen', this.showScreen)
     }
+
+    setTimeout(() => {
+      this.filteredUserList();
+    }, 10);
 
   }
 
@@ -351,6 +356,53 @@ export class AppComponent implements AfterViewChecked {
     this.messageText = '';
   }
 
+  createRoom(user) {
+
+    this.search = '';
+    
+    const datePart = new Date().getTime().toString(36);
+    const randomPart = Math.random().toString(36).substring(2, 7);
+    const room_id = `RoomId-${datePart}-${randomPart}`;
+    console.log('Search user >>>', user);
+    console.log('room_id >>>', room_id);
+
+    let obj = {
+      "data": {
+        "spname": "sp_ca_createRoomId",
+        "parameters": {
+          "userId" : this.currentUser.id,
+          "userName" : this.currentUser.name,
+          "roomUserId" : user.id,
+          "roomUserName" : user.name,
+          "roomId": room_id
+        }
+      }
+    }
+    this.api.post('index/json', obj).subscribe(res => {
+      console.log(res['results'].data[0].results);
+      this.getUserRoomIdAndDetailsByPhone();
+      setTimeout(() => {
+        this.filteredUserList();
+      }, 10);
+      alert(res['results'].data[0].results);
+    });
+  }
+
+  // Function to filter users based on currentUser's id
+  userListWithFilterUser = [];
+  filteredUserList() {
+    const currentUserRoomIds = Object.keys(this.currentUser?.roomId);
+
+    this.userListWithFilterUser = this.userList.filter(user =>
+      currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
+  );
+    // let filterUser = this.userList.filter(user =>
+    //   Object.keys(user.roomId).some(roomId => currentUserRoomIds.includes(roomId))
+    // );
+    // this.userListWithFilterUser = filterUser.filter((user) => user.phone !== this.phone.toString());
+    console.log('userListWithFilterUser', this.userListWithFilterUser)
+  }
+  
   ngOnDestroy(): void {
     if (this.timer) {
       clearInterval(this.timer);

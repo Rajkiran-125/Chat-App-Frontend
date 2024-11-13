@@ -6,11 +6,27 @@
         <div>{{currentUser?.name}} <br> m-hollaway&#64;gmail.com</div>
       </div>
 
+      <div class="search-box">
+        <!-- <label for="cars">Search User</label> -->
+        <input type="text" placeholder="Search user" [(ngModel)]="search">
+        <!-- <select name="cars" id="cars">
+          <option value="">Select</option>
+          <option  [value]="user">{{user.name}}</option>
+        </select> -->
+        <div class="">
+          <p style="cursor: pointer;" *ngFor="let user of userList | filter: search" (click)="createRoom(user)">{{user.name}}</p>
+        </div>
+        <!-- <ul>
+          <li *ngFor="let user of userList | filter: search">{{user.name}}</li>
+        </ul> -->
+
+        
+      </div>
 
       <div class="list-group lg-alt">
-        <!-- {{selectedUser | json}} -->
+        <!-- {{filteredUserList | json}} -->
         <a class="list-group-item media" [ngClass]="user?.phone === selectedUser?.phone && 'active'"
-          *ngFor="let user of userList" (click)="selectUserHandler(user?.phone); toggleMenu()">
+          *ngFor="let user of userListWithFilterUser" (click)="selectUserHandler(user?.phone); toggleMenu()">
           <div class="pull-left">
             <img [src]="user?.image" alt="" class="img-avatar">
           </div>
@@ -24,7 +40,8 @@
       <!-- footer -->
       <div class="ms-footer">
         <!-- <button (click)="toggleMenu()">Toggle Menu</button> -->
-        <small>This project is made with <i class="fa-solid fa-heart" style="color: red;"></i> by <br> <a href="https://rajkiranjaiswar.com" target="_blank">Rajkiran Jaiswar</a></small>
+        <small>This project is made with <i class="fa-solid fa-heart" style="color: red;"></i> by <br> <a
+            href="https://rajkiranjaiswar.com" target="_blank">Rajkiran Jaiswar</a></small>
       </div>
 
     </div>
@@ -102,6 +119,8 @@
           <br>
           <br>
           {{messageArray | json}}
+          <br>
+          {{selectedUser | json}}
           <div class="message-feed " *ngFor="let item of messageArray"
             [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
             <!-- <div class="pull-left">

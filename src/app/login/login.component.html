@@ -50,7 +50,7 @@
         <!-- <p class="modal-desc">Fanny pack hexagon food truck, street art waistcoat kitsch.</p> -->
         <div class="input-block">
           <label for="phone" class="input-label">User name</label>
-          <input type="phone" name="phone" id="phone" placeholder="Enter your phone number" [(ngModel)]="userName" />
+          <input type="text" name="username" id="username" placeholder="Enter your phone number" [(ngModel)]="userName" />
           <!-- <input type="phone" name="phone" id="phone" placeholder="Enter your phone number" /> -->
         </div>
         <div class="input-block">
@@ -61,15 +61,18 @@
         <!-- <div class="profilePic">
           <img [src]="img" alt="ProfilePic" *ngFor="let img of profilePic">
         </div> -->
-
-        <div class="profilePic">
-          <img
+        <!-- <small>Select Profile Picture</small>/ -->
+        <div class="input-block">
+          <label for="phone" class="input-label">Select Profile Picture</label>
+          <div class="profilePic">
+            <img
             [src]="img"
             alt="Profile Pic"
             *ngFor="let img of profilePics"
             (click)="selectProfilePic(img)"
             [class.selected]="img === selectedProfilePic"
-          />
+            />
+          </div>
         </div>
         
         <!-- <p>Selected Profile Pic:</p>
@@ -82,7 +85,7 @@
         <br>
         <div class="modal-buttons">
           <!-- <a href="" class="">Forgot your password?</a> -->
-          <span>have an account</span>
+          <span>Have an account</span>
           <button class="input-button" (click)="tab = 'login'">Login</button>
         </div>
         <!-- <p class="sign-up">Don't have an account? <a href="#">Sign up now</a></p> -->
