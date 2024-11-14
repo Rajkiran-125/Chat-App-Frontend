@@ -15,6 +15,7 @@ export class LoginComponent {
   userName;
   phoneNumber;
   selectedProfilePic: string | null = null;
+  userList:any;
 
   profilePics = [
     'https://bootdey.com/img/Content/avatar/avatar1.png',
@@ -60,6 +61,7 @@ export class LoginComponent {
       };
 
       this.api.post('index/json', obj).subscribe(res => {
+        this.getUserRoomIdAndDetailsByPhone();
         console.log(res['results'].data[0].results);
         alert(res['results'].data[0].results);
         this.tab = 'login'
@@ -68,15 +70,65 @@ export class LoginComponent {
         this.selectedProfilePic = '';
       });
     }else{
-      alert('Please fill the require field')
+      alert('Please fill the require field');
     }
   }
 
   ngOnInit(): void {
 
   }
+  getUserRoomIdAndDetailsByPhone() {
+    let obj = {
+      "data": {
+        "spname": "sp_ca_getUserList",
+        "parameters": {
+          "flag": "withPhone"
+        }
+      }
+    };
 
+    this.api.post('index/json', obj).subscribe(res => {
 
+      // {
+      //   id: 4,
+      //   name: 'Kamlesh',
+      //   phone: '20',
+      //   image: 'https://bootdey.com/img/Content/avatar/avatar4.png',
+      //   roomId: {
+      //     1: 'room-3',
+      //     2: 'room-5',
+      //     3: 'room-6'
+      //   }
+      // }
+      if (res['code'] === 200) {
+        const rawData = res['results'].data;
+        if (rawData && rawData.length > 0) {
+          // Build user list object with room mapping
+          let userList = {};
+          rawData.forEach(item => {
+            if (!userList[item.UserId]) {
+              userList[item.UserId] = {
+                id: item.UserId,
+                name: item.UserName,
+                phone: item.Phone,
+                image: item.ProfilePic,
+                roomId: {}
+              };
+            }
+            if (item.RoomUserId && item.RoomId) {
+              userList[item.UserId].roomId[item.RoomUserId] = item.RoomId;
+            }
+          });
+
+          this.userList = Object.values(userList);
+          localStorage.setItem('userList', JSON.stringify(this.userList));
+        }
+      } else {
+        console.log('UserName data get Failed >>>>>');
+      }
+      console.log('UserName data get >>>>>>', res);
+    });
+  }
 
 
   login() {
@@ -85,7 +137,22 @@ export class LoginComponent {
       phone: this.phone,
       showScreen: this.showScreen = true
     }
-    this.valueEmitter.emit(obj);
+    this.userList = JSON.parse(localStorage.getItem('userList'));
+
+    if(this.userList){
+
+      const matchingUser = this.userList.find(user => user.phone === this.phone);
+      
+      if (matchingUser) {
+        console.log('Login successful', matchingUser);
+        // Proceed with login actions
+        this.valueEmitter.emit(obj);
+      } else {
+        alert('Login failed: No user with this phone number found')
+        console.log('Login failed: No user with this phone number found');
+        // Handle login failure
+      }
+    }
   }
 
 

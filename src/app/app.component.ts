@@ -14,7 +14,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.9'
+  version: string = 'V.0.0.10'
   search: any;
 
   public roomId: string;
@@ -214,7 +214,12 @@ export class AppComponent implements AfterViewChecked {
 
           this.userList = Object.values(userList);
           localStorage.setItem('userList', JSON.stringify(this.userList));
-          this.login();
+
+          if(this.userList && this.phone){
+            this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
+            this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
+            this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
+          }
         }
       } else {
         console.log('UserName data get Failed >>>>>');
@@ -273,17 +278,17 @@ export class AppComponent implements AfterViewChecked {
   }
 
   login(): void {
+    this.getUserRoomIdAndDetailsByPhone();
 
-    this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
+    this.currentUser = this.userList.find((user) => user.phone === this.phone.toString());
     this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
     this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
 
     console.log(this.loginUser);
     if (this.currentUser) {
       this.showScreen = true;
-      console.log('this.showScreen', this.showScreen)
+      console.log('this.showScreen', this.showScreen);
     }
-
     setTimeout(() => {
       this.filteredUserList();
     }, 10);
@@ -316,9 +321,10 @@ export class AppComponent implements AfterViewChecked {
 
   sendMessage(): void {
 
+    // this.selectedUser = this.userList.find(user => user.phone === this.selectedUser.phone);
     if (!this.messageText.trim()) return;
 
-    const date = this.dateTime.toISOString()
+    const date = this.dateTime.toISOString();
 
     this.chatService.sendMessage({
       user: this.currentUser.name,
@@ -359,7 +365,7 @@ export class AppComponent implements AfterViewChecked {
   createRoom(user) {
 
     this.search = '';
-    
+
     const datePart = new Date().getTime().toString(36);
     const randomPart = Math.random().toString(36).substring(2, 7);
     const room_id = `RoomId-${datePart}-${randomPart}`;
@@ -370,10 +376,10 @@ export class AppComponent implements AfterViewChecked {
       "data": {
         "spname": "sp_ca_createRoomId",
         "parameters": {
-          "userId" : this.currentUser.id,
-          "userName" : this.currentUser.name,
-          "roomUserId" : user.id,
-          "roomUserName" : user.name,
+          "userId": this.currentUser.id,
+          "userName": this.currentUser.name,
+          "roomUserId": user.id,
+          "roomUserName": user.name,
           "roomId": room_id
         }
       }
@@ -381,6 +387,7 @@ export class AppComponent implements AfterViewChecked {
     this.api.post('index/json', obj).subscribe(res => {
       console.log(res['results'].data[0].results);
       this.getUserRoomIdAndDetailsByPhone();
+      this.roomId = room_id
       setTimeout(() => {
         this.filteredUserList();
       }, 10);
@@ -395,14 +402,14 @@ export class AppComponent implements AfterViewChecked {
 
     this.userListWithFilterUser = this.userList.filter(user =>
       currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
-  );
+    );
     // let filterUser = this.userList.filter(user =>
     //   Object.keys(user.roomId).some(roomId => currentUserRoomIds.includes(roomId))
     // );
     // this.userListWithFilterUser = filterUser.filter((user) => user.phone !== this.phone.toString());
     console.log('userListWithFilterUser', this.userListWithFilterUser)
   }
-  
+
   ngOnDestroy(): void {
     if (this.timer) {
       clearInterval(this.timer);

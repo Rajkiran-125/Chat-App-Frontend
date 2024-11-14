@@ -3,12 +3,12 @@
     <div class="ms-menu" [class.toggled]="menuToggled">
       <div class="ms-user clearfix">
         <img [src]="currentUser?.image" alt="" class="img-avatar pull-left">
-        <div>{{currentUser?.name}} <br> m-hollaway&#64;gmail.com</div>
+        <div>{{currentUser?.name}} <br> {{currentUser?.phone}}</div>
       </div>
 
       <div class="search-box">
         <!-- <label for="cars">Search User</label> -->
-        <input type="text" placeholder="Search user" [(ngModel)]="search">
+        <input type="text" placeholder="Search user" (focus)="getUserRoomIdAndDetailsByPhone()" [(ngModel)]="search">
         <!-- <select name="cars" id="cars">
           <option value="">Select</option>
           <option  [value]="user">{{user.name}}</option>
@@ -19,8 +19,6 @@
         <!-- <ul>
           <li *ngFor="let user of userList | filter: search">{{user.name}}</li>
         </ul> -->
-
-        
       </div>
 
       <div class="list-group lg-alt">
@@ -147,8 +145,6 @@
             <small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:30</small>
           </div>
         </div> -->
-
-
         </div>
 
         <div class="msb-reply">

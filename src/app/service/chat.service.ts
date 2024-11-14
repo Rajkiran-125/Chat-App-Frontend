@@ -25,7 +25,7 @@ export class ChatService {
 
   wakeUpApi(){
     const res = this.http.get(this.url);
-    console.log(res);
+    console.log('wakeUpApi >>>>>>.',res);
   }
 
   joinRoom(data): void {
