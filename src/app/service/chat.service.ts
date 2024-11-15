@@ -25,19 +25,20 @@ export class ChatService {
 
   wakeUpApi(){
     const res = this.http.get(this.url);
-    console.log(res);
+    console.log('wakeUpApi >>>>>>.',res);
   }
 
   joinRoom(data): void {
     this.socket.emit('join', data);
   }
 
+
   sendMessage(data): void {
     this.socket.emit('message', data);
   }
 
   getMessage(): Observable<any> {
-    return new Observable<{user: string, message: string}>(observer => {
+    return new Observable<{UserName: string, message: string}>(observer => {
       this.socket.on('new message', (data) => {
         observer.next(data);
 

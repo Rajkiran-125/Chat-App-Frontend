@@ -1,0 +1,72 @@
+Create table UserList (
+	Id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	[UserName] nvarchar(100),
+	Phone nvarchar(100),
+	ProfilePic nvarchar(max),
+	RoomName nvarchar(200),
+	UserStatus nvarchar(100),
+	IsLogin bit default 0,
+	IsSuperAdmin bit default 0,
+	IsLock bit default 0,
+	LockReason nvarchar(max),
+	CreatedDateTime datetime,
+	DeletedDateTime datetime,
+	UpdatedDateTime datetime
+)
+
+-- drop table RoomId 
+
+select * from UserList
+
+insert into UserList ([UserName], Phone, ProfilePic, RoomName, UserStatus, CreatedDateTime) values
+-- ('Rajkiran','8286231170','https://bootdey.com/img/Content/avatar/avatar1.png', 'Rajkiran_1', 'Active', GETDATE()),
+-- ('Mohit','18','https://bootdey.com/img/Content/avatar/avatar1.png', 'Rajkiran_2', 'Active', GETDATE())
+('Neha','10','https://bootdey.com/img/Content/avatar/avatar3.png', 'Neha_3', 'Active', GETDATE())
+
+update UserList set ProfilePic = 'https://bootdey.com/img/Content/avatar/avatar2.png'
+where Id = 2 and UserName = 'Mohit'
+
+Create table RoomId (
+	Id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	UserId int,
+	[UserName] nvarchar(100),
+	[RoomUserId] nvarchar(100),
+	[RoomUserName] nvarchar(100),
+	RoomId nvarchar(200),
+	CreatedDateTime datetime
+)
+
+select * from RoomId
+
+select * from UserList
+
+-- truncate table RoomId
+
+insert into RoomId (UserId, UserName, [RoomUserName], RoomUserId, RoomId, CreatedDateTime) values
+(1,'Rajkiran', 'Mohit',2, 'RajkiranMohit21', GETDATE()),
+(1,'Rajkiran', 'Neha',3, 'RajkiranNeha13', GETDATE()),
+(2,'Mohit', 'Rajkiran',1, 'RajkiranMohit21', GETDATE()),
+(2,'Mohit', 'Neha',3, 'MohitNeha23', GETDATE()),
+(3,'Neha', 'Rajkiran',1, 'RajkiranNeha13', GETDATE()),
+(3,'Neha', 'Mohit',2, 'MohitNeha23', GETDATE())
+
+
+
+select * from userList ul
+	where ul.Phone = '8286231170'
+
+select ri.* from RoomId ri
+join UserList ul on ul.Id = ri.UserId 
+where ul.Phone = '8286231170'
+
+
+SELECT 
+        ul.id AS UserId,
+        ul.UserName,
+        ul.Phone,
+        ul.ProfilePic,
+        ri.RoomUserId,
+        ri.RoomId
+    FROM userList ul
+    LEFT JOIN RoomId ri ON ul.Id = ri.UserId
+	WHERE ul.Phone = '8286231170'

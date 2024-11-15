@@ -7,17 +7,20 @@ import { AppComponent } from './app.component';
 import { ChatRoomComponent } from './chat-room/chat-room.component';
 import { LoginComponent } from './login/login.component';
 import { HttpClientModule } from '@angular/common/http';
+import { FilterPipe } from './filter.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     ChatRoomComponent,
-    LoginComponent
+    LoginComponent,
+    FilterPipe
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    
     // AppRoutingModule
   ],
   providers: [],
