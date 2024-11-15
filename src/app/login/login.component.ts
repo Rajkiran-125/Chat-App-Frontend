@@ -133,10 +133,7 @@ export class LoginComponent {
 
   login() {
     // Emit the phone number to the parent component
-    const obj = {
-      phone: this.phone,
-      showScreen: this.showScreen = true
-    }
+    
     this.userList = JSON.parse(localStorage.getItem('userList'));
 
     if(this.userList){
@@ -146,12 +143,24 @@ export class LoginComponent {
       if (matchingUser) {
         console.log('Login successful', matchingUser);
         // Proceed with login actions
+        const obj = {
+          phone: this.phone,
+          showScreen: this.showScreen = true
+        }
         this.valueEmitter.emit(obj);
       } else {
+
         alert('Login failed: No user with this phone number found')
         console.log('Login failed: No user with this phone number found');
+
         // Handle login failure
       }
+    }else {
+
+      alert('Login failed: No user with this phone number found')
+      console.log('Login failed: No user with this phone number found');
+
+      // Handle login failure
     }
   }
 

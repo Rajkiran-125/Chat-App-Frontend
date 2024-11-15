@@ -14,7 +14,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.10'
+  version: string = 'V.0.0.11'
   search: any;
 
   public roomId: string;
@@ -180,22 +180,9 @@ export class AppComponent implements AfterViewChecked {
     };
 
     this.api.post('index/json', obj).subscribe(res => {
-
-      // {
-      //   id: 4,
-      //   name: 'Kamlesh',
-      //   phone: '20',
-      //   image: 'https://bootdey.com/img/Content/avatar/avatar4.png',
-      //   roomId: {
-      //     1: 'room-3',
-      //     2: 'room-5',
-      //     3: 'room-6'
-      //   }
-      // }
       if (res['code'] === 200) {
         const rawData = res['results'].data;
         if (rawData && rawData.length > 0) {
-          // Build user list object with room mapping
           let userList = {};
           rawData.forEach(item => {
             if (!userList[item.UserId]) {
@@ -227,6 +214,66 @@ export class AppComponent implements AfterViewChecked {
       console.log('UserName data get >>>>>>', res);
     });
   }
+
+  getUserRoomIdAndDetailsPromise(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const obj = {
+        data: {
+          spname: 'sp_ca_getUserList',
+          parameters: { flag: 'withPhone' }
+        }
+      };
+  
+      this.api.post('index/json', obj).subscribe(
+        (res) => {
+          if (res['code'] === 200) {
+            const rawData = res['results'].data;
+            if (rawData && rawData.length > 0) {
+              let userList = {};
+              rawData.forEach((item) => {
+                if (!userList[item.UserId]) {
+                  userList[item.UserId] = {
+                    id: item.UserId,
+                    name: item.UserName,
+                    phone: item.Phone,
+                    image: item.ProfilePic,
+                    roomId: {}
+                  };
+                }
+                if (item.RoomUserId && item.RoomId) {
+                  userList[item.UserId].roomId[item.RoomUserId] = item.RoomId;
+                }
+              });
+  
+              this.userList = Object.values(userList);
+              localStorage.setItem('userList', JSON.stringify(this.userList));
+  
+              if (this.userList && this.phone) {
+                this.currentUser = this.userList.find(
+                  (user) => user.phone === this.phone.toString()
+                );
+                this.loginUser = this.userList.filter(
+                  (user) => user.phone == this.phone.toString()
+                );
+                this.userList = this.userList.filter(
+                  (user) => user.phone !== this.phone.toString()
+                );
+              }
+            }
+            resolve(); // Resolve the promise
+          } else {
+            console.error('UserName data get failed.');
+            reject('Failed to fetch user data');
+          }
+        },
+        (err) => {
+          console.error('API Error:', err);
+          reject(err);
+        }
+      );
+    });
+  }
+  
 
   loadMessagesFromStorage(): void {
     this.storageArray = this.chatService.getStorage();
@@ -297,12 +344,15 @@ export class AppComponent implements AfterViewChecked {
 
   selectUserHandler(phone: string): void {
 
-    this.selectedUser = this.userList.find(user => user.phone === phone);
+    this.getUserRoomIdAndDetailsByPhone();
+    let userList = JSON.parse(localStorage.getItem('userList'));
+
+    this.selectedUser = userList.find(user => user.phone === phone);
     this.roomId = this.selectedUser.roomId[this.currentUser.id];
     this.messageArray = [];
 
     this.storageArray = this.chatService.getStorage();
-    const storeIndex = this.storageArray
+    const storeIndex = this.storageArray 
       .findIndex((storage) => storage.roomId === this.roomId);
 
     if (storeIndex > -1) {
@@ -310,6 +360,32 @@ export class AppComponent implements AfterViewChecked {
     }
     this.join(this.currentUser.name, this.roomId);
   }
+
+  selectUserHandlerForSendMsg(phone: string): void {
+    this.getUserRoomIdAndDetailsPromise().then(() => {
+      const userList = JSON.parse(localStorage.getItem('userList') || '[]');
+  
+      this.selectedUser = userList.find(user => user.phone === phone);
+      if (!this.selectedUser || !this.currentUser) {
+        console.error('Selected user or current user not found.');
+        return;
+      }
+  
+      this.roomId = this.selectedUser.roomId[this.currentUser.id];
+      this.messageArray = [];
+  
+      this.storageArray = this.chatService.getStorage();
+      const storeIndex = this.storageArray.findIndex(
+        (storage) => storage.roomId === this.roomId
+      );
+  
+      if (storeIndex > -1) {
+        this.messageArray = this.storageArray[storeIndex].chats;
+      }
+      this.join(this.currentUser.name, this.roomId);
+    });
+  }
+  
 
   join(username: string, roomId: string): void {
     this.chatService.joinRoom({ user: username, room: roomId });
@@ -321,6 +397,7 @@ export class AppComponent implements AfterViewChecked {
 
   sendMessage(): void {
 
+    this.selectUserHandlerForSendMsg(this.selectedUser.phone);
     // this.selectedUser = this.userList.find(user => user.phone === this.selectedUser.phone);
     if (!this.messageText.trim()) return;
 
@@ -366,9 +443,16 @@ export class AppComponent implements AfterViewChecked {
 
     this.search = '';
 
+    let userName = this.userListWithFilterUser.find(res => res.name == user.name && res.phone == user.phone);
+    if(userName){
+      this.selectUserHandler(user.phone);
+      return;
+    }
+
     const datePart = new Date().getTime().toString(36);
     const randomPart = Math.random().toString(36).substring(2, 7);
     const room_id = `RoomId-${datePart}-${randomPart}`;
+
     console.log('Search user >>>', user);
     console.log('room_id >>>', room_id);
 
@@ -386,12 +470,13 @@ export class AppComponent implements AfterViewChecked {
     }
     this.api.post('index/json', obj).subscribe(res => {
       console.log(res['results'].data[0].results);
-      this.getUserRoomIdAndDetailsByPhone();
-      this.roomId = room_id
-      setTimeout(() => {
-        this.filteredUserList();
-      }, 10);
-      alert(res['results'].data[0].results);
+      this.getUserRoomIdAndDetailsPromise().then(()=>{
+        this.roomId = room_id
+        setTimeout(() => {
+          this.filteredUserList();
+        }, 10);
+        alert(res['results'].data[0].results);
+      });
     });
   }
 

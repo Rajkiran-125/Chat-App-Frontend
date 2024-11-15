@@ -32,6 +32,7 @@ export class ChatService {
     this.socket.emit('join', data);
   }
 
+
   sendMessage(data): void {
     this.socket.emit('message', data);
   }
