@@ -13,7 +13,7 @@
           <option value="">Select</option>
           <option  [value]="user">{{user.name}}</option>
         </select> -->
-        <div class="search-results">
+        <div class="">
           <p style="cursor: pointer;" *ngFor="let user of userList | filter: search" (click)="createRoom(user)">
             {{user.name}}</p>
         </div>
@@ -24,16 +24,14 @@
 
       <div class="list-group lg-alt">
         <!-- {{filteredUserList | json}} -->
-        <a class="user-list-menu media" [ngClass]="user?.phone === selectedUser?.phone && 'active'"
+        <a class="list-group-item media" [ngClass]="user?.phone === selectedUser?.phone && 'active'"
           *ngFor="let user of userListWithFilterUser" (click)="selectUserHandler(user?.phone); toggleMenu()">
           <div class="pull-left">
             <img [src]="user?.image" alt="" class="img-avatar">
           </div>
           <div class="media-body">
             <small class="list-group-item-heading">{{user?.name}}</small>
-            <!-- <br>
-            {{user.roomId | json}}
-            <small class="list-group-item-text c-gray">{{messageArray[messageArray.length - 1].message}}</small> -->
+            <!-- <small class="list-group-item-text c-gray">Fierent fastidii recteque ad pro</small> -->
           </div>
         </a>
 
@@ -50,7 +48,7 @@
   <div class="ms-body">
     <div class="action-header clearfix">
       <div class="visible-xs" (click)="toggleMenu()" id="ms-menu-trigger">
-        <i class="fa fa-bars" style="color: #fff;"></i>
+        <i class="fa fa-bars"></i>
       </div>
 
       <div class="pull-left hidden-xs" *ngIf="selectedUser">
@@ -65,11 +63,8 @@
       <!-- roomId: {{roomId}} -->
       <ul class="ah-actions actions">
         <li>
-          <span style="color: #fff;">{{version}}</span>
+          <span>{{version}}</span>
 
-        </li>
-        <li class="logout" (click)="logout()" title="Logout">
-          <i class="fa-solid fa-right-from-bracket"></i>
         </li>
         <!-- <li>
             <a href="">
@@ -161,12 +156,9 @@
           (keyup)="$event.keyCode === 13 && sendMessage()" />
         <button (click)="messageText !== '' ? sendMessage() : ''"><i class="fa fa-paper-plane-o"></i></button>
       </div>
-      <div>
-        <a href=""></a>
-      </div>
 
     </div>
-    <div class="" *ngIf="!selectedUser ">
+    <div class="msg-body" *ngIf="!selectedUser ">
       <div class="user-notSelected">
         <span>Please select user to chat</span>
       </div>

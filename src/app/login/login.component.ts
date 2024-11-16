@@ -36,6 +36,17 @@ export class LoginComponent {
     private api: ApiService
   ) { }
 
+  ngOnInit(): void {
+    const checkUser = JSON.parse(localStorage.getItem('user'));
+    if(checkUser){{
+      const obj = {
+        phone: checkUser,
+        showScreen: this.showScreen = true
+      }
+      this.valueEmitter.emit(obj);
+    }}
+  }
+
   selectProfilePic(img: string) {
     this.selectedProfilePic = img;
     console.log("this.selectProfilePic", this.selectProfilePic)
@@ -74,9 +85,7 @@ export class LoginComponent {
     }
   }
 
-  ngOnInit(): void {
 
-  }
   getUserRoomIdAndDetailsByPhone() {
     let obj = {
       "data": {
@@ -147,6 +156,7 @@ export class LoginComponent {
           phone: this.phone,
           showScreen: this.showScreen = true
         }
+        localStorage.setItem('user',JSON.stringify(this.phone));
         this.valueEmitter.emit(obj);
       } else {
 

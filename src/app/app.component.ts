@@ -14,7 +14,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.11'
+  version: string = 'V.0.0.12'
   search: any;
 
   public roomId: string;
@@ -255,9 +255,9 @@ export class AppComponent implements AfterViewChecked {
                 this.loginUser = this.userList.filter(
                   (user) => user.phone == this.phone.toString()
                 );
-                this.userList = this.userList.filter(
-                  (user) => user.phone !== this.phone.toString()
-                );
+                // this.userList = this.userList.filter(
+                //   (user) => user.phone !== this.phone.toString()
+                // );
               }
             }
             resolve(); // Resolve the promise
@@ -325,20 +325,21 @@ export class AppComponent implements AfterViewChecked {
   }
 
   login(): void {
-    this.getUserRoomIdAndDetailsByPhone();
+    this.getUserRoomIdAndDetailsPromise().then(()=>{
+      this.currentUser = this.userList.find((user) => user.phone === this.phone.toString());
+      this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
+      this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
+  
+      console.log(this.loginUser);
+      if (this.currentUser) {
+        this.showScreen = true;
+        console.log('this.showScreen', this.showScreen);
+      }
+      setTimeout(() => {
+        this.filteredUserList();
+      }, 10);
+    });
 
-    this.currentUser = this.userList.find((user) => user.phone === this.phone.toString());
-    this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
-    this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
-
-    console.log(this.loginUser);
-    if (this.currentUser) {
-      this.showScreen = true;
-      console.log('this.showScreen', this.showScreen);
-    }
-    setTimeout(() => {
-      this.filteredUserList();
-    }, 10);
 
   }
 
@@ -359,6 +360,7 @@ export class AppComponent implements AfterViewChecked {
       this.messageArray = this.storageArray[storeIndex].chats;
     }
     this.join(this.currentUser.name, this.roomId);
+    console.log('storageArray""""""" ',this.storageArray)
   }
 
   selectUserHandlerForSendMsg(phone: string): void {
@@ -494,7 +496,10 @@ export class AppComponent implements AfterViewChecked {
     // this.userListWithFilterUser = filterUser.filter((user) => user.phone !== this.phone.toString());
     console.log('userListWithFilterUser', this.userListWithFilterUser)
   }
-
+  logout(){
+    localStorage.removeItem('user');
+    this.showScreen = false;
+  }
   ngOnDestroy(): void {
     if (this.timer) {
       clearInterval(this.timer);
