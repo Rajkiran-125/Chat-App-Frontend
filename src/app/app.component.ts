@@ -15,7 +15,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.12'
+  version: string = 'V.0.0.13'
   search: any;
 
   public roomId: string;
