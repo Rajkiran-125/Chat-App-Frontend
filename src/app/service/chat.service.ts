@@ -10,8 +10,8 @@ import { HttpClient } from '@angular/common/http';
 export class ChatService {
   
   private socket: Socket;
-  // private url = 'http://localhost:3000'; // your server local path
-  private url = 'https://chat-app-node-socket-io-5m2o.onrender.com'; // your server local path
+  private url = 'http://localhost:3000'; // your server local path
+  // private url = 'https://chat-app-node-socket-io-5m2o.onrender.com'; // your server local path
 
   constructor(
     private http: HttpClient
@@ -30,6 +30,7 @@ export class ChatService {
 
   joinRoom(data): void {
     this.socket.emit('join', data);
+    this.socket.emit('user-joined', { username: data.user });
   }
 
 
@@ -46,6 +47,14 @@ export class ChatService {
       return () => {
         this.socket.disconnect();
       }
+    });
+  }
+
+  getUserStatus(): Observable<any> {
+    return new Observable(observer => {
+      this.socket.on('user-status-changed', (data) => {
+        observer.next(data);
+      });
     });
   }
 

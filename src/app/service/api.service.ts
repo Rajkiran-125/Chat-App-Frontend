@@ -15,6 +15,11 @@ export class ApiService {
     return this.http.post(environment.baseUrl+endPoint,obj)
   }
 
-
+  porfolioApi() {
+    return this.http.get("https://portfolio-api-m6u1.onrender.com", { responseType: 'text' }); // Specify 'text' for non-JSON
+  }
+  chatAppApi() {
+    return this.http.get("https://chat-app-node-socket-io-5m2o.onrender.com", { responseType: 'text' }); // Specify 'text' for non-JSON
+  }
   
 }
