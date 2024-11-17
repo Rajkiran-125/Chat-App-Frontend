@@ -74,7 +74,7 @@ export class LoginComponent {
       this.api.post('index/json', obj).subscribe(res => {
         this.getUserRoomIdAndDetailsByPhone();
         console.log(res['results'].data[0].results);
-        alert(res['results'].data[0].results);
+        alert('Signup success');
         this.tab = 'login'
         this.userName = '';
         this.phoneNumber = '';

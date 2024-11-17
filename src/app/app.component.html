@@ -31,12 +31,20 @@
           </div>
           <div class="media-body">
             <small class="list-group-item-heading">{{user?.name}}</small>
-            <!-- <br>
-            {{user.roomId | json}}
-            <small class="list-group-item-text c-gray">{{messageArray[messageArray.length - 1].message}}</small> -->
+            <br>
+            <!-- {{user.roomId | json}} -->
+            <small class="list-group-item-text c-gray">{{user.status ? user.status : 'Offline'}}</small>
           </div>
         </a>
 
+      </div>
+      <div *ngFor="let user of userStatusMap | keyvalue">
+        <p style="color: #fff;">
+          {{ user.key }} is 
+          <span [ngClass]="{'online': user.value === 'online', 'offline': user.value === 'offline'}">
+            {{ user.value }}
+          </span>
+        </p>
       </div>
       <!-- footer -->
       <div class="ms-footer">
@@ -59,6 +67,8 @@
 
         </div>
         <span>{{selectedUser.name}}</span>
+        <!-- <br>
+        <span>{{selectedUser.status}}</span> -->
       </div>
       <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
 

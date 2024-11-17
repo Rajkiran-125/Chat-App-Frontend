@@ -133,7 +133,7 @@ img{
 
 .message-feed.right .mf-content {
   background: #fb7777;
-  // color: #fff;
+  color: #fff;
   border-radius: 15px 15px 0px 15px;
   box-shadow: -7px 6px 15px -4px gray;
   ;
@@ -156,7 +156,7 @@ img{
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
-    border: none;
+    border: 2px solid #fb7777;
     border-radius: 15px;
     padding: 5px;
     box-shadow: inset 8px 8px 11px -2px #a7a7a7;
@@ -497,4 +497,11 @@ img{
     color: #fff;
     padding: 5px;
   }
+}
+
+.online {
+  color: green;
+}
+.offline {
+  color: red;
 }

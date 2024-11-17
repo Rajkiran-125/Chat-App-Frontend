@@ -1,6 +1,7 @@
 import { Component, HostListener, ViewChild, AfterViewChecked, ElementRef, OnDestroy } from '@angular/core';
 import { ChatService } from './service/chat.service';
 import { ApiService } from './service/api.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -14,7 +15,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.12'
+  version: string = 'V.0.0.13'
   search: any;
 
   public roomId: string;
@@ -33,6 +34,12 @@ export class AppComponent implements AfterViewChecked {
   userList: any;
   menuToggled = true;
   replyText = '';
+
+  private intervalId: any;
+  private apiSubscriptionPortfolio: Subscription | null = null;
+  private apiSubscriptionChatApp: Subscription | null = null;
+
+  userStatusMap = new Map<string, string>(); // Key: Username, Value: Status (online/offline)
 
   // public userList = [
   //   {
@@ -142,9 +149,75 @@ export class AppComponent implements AfterViewChecked {
       }
     });
 
+    this.chatService.getUserStatus().subscribe((data: { username: string; status: string }) => {
+      this.userStatusMap.set(data.username, data.status);
+      console.log(`${data.username} is now ${data.status}`);
+      console.log('userStatusMap >>>> ', this.userStatusMap);
+      this.updateUserStatus();
+    });
+
+    this.intervalId = setInterval(() => {
+      this.apiSubscriptionPortfolio = this.api.porfolioApi().subscribe(
+        (response) => {
+          // console.log('apiSubscriptionPortfolio response:', response);
+        },
+        (error) => {
+          console.error('apiSubscriptionPortfolio error:', error);
+        }
+      );
+      this.apiSubscriptionChatApp = this.api.porfolioApi().subscribe(
+        (response) => {
+          // console.log('apiSubscriptionChatApp response:', response);
+        },
+        (error) => {
+          console.error('apiSubscriptionChatApp error:', error);
+        }
+      );
+    }, 60000); // 60000 milliseconds = 1 minute
+
     // Load existing messages from storage when component initializes
     this.loadMessagesFromStorage();
   }
+  updateUserStatus(): void {
+    if (!this.userList || !this.userStatusMap) return;
+
+    this.userList.forEach(user => {
+      if (this.userStatusMap.has(user.name)) { // Assuming 'name' is the key to match usernames
+        user.status = this.userStatusMap.get(user.name); // Update the status
+      }
+    });
+    // Optionally save the updated userList to localStorage or another storage medium
+    localStorage.setItem('userList', JSON.stringify(this.userList));
+    // this.getUserRoomIdAndDetailsByPhone();
+
+    // Update related properties dynamically
+    this.refreshRelatedUserProperties();
+  }
+
+  refreshRelatedUserProperties(): void {
+    // Update currentUser
+    // if (this.phone) {
+    //   this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
+    // }
+    // this.selectedUser = this.userList.find(user => user.phone === this.phone);
+    // Update loginUser
+    if (this.phone) {
+      this.loginUser = this.userList.filter(user => user.phone === this.phone.toString());
+    }
+
+    // Update userListWithFilterUser
+    if (this.currentUser) {
+      const currentUserRoomIds = Object.keys(this.currentUser.roomId || {});
+      this.userListWithFilterUser = this.userList.filter(user =>
+        currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
+      );
+    }
+
+    console.log('Updated currentUser:', this.currentUser);
+    console.log('Updated loginUser:', this.loginUser);
+    console.log('Updated userListWithFilterUser:', this.userListWithFilterUser);
+  }
+
 
   getUserList() {
     let obj = {
@@ -165,7 +238,7 @@ export class AppComponent implements AfterViewChecked {
       } else {
         console.log('User data get Failed >>>>>')
       }
-      console.log('User data get >>>>>>', res);
+      // console.log('User data get >>>>>>', res);
     })
   }
 
@@ -191,6 +264,7 @@ export class AppComponent implements AfterViewChecked {
                 name: item.UserName,
                 phone: item.Phone,
                 image: item.ProfilePic,
+                status: "",
                 roomId: {}
               };
             }
@@ -202,7 +276,7 @@ export class AppComponent implements AfterViewChecked {
           this.userList = Object.values(userList);
           localStorage.setItem('userList', JSON.stringify(this.userList));
 
-          if(this.userList && this.phone){
+          if (this.userList && this.phone) {
             this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
             this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
             this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
@@ -211,7 +285,7 @@ export class AppComponent implements AfterViewChecked {
       } else {
         console.log('UserName data get Failed >>>>>');
       }
-      console.log('UserName data get >>>>>>', res);
+      // console.log('UserName data get >>>>>>', res);
     });
   }
 
@@ -223,7 +297,7 @@ export class AppComponent implements AfterViewChecked {
           parameters: { flag: 'withPhone' }
         }
       };
-  
+
       this.api.post('index/json', obj).subscribe(
         (res) => {
           if (res['code'] === 200) {
@@ -237,6 +311,7 @@ export class AppComponent implements AfterViewChecked {
                     name: item.UserName,
                     phone: item.Phone,
                     image: item.ProfilePic,
+                    status: "",
                     roomId: {}
                   };
                 }
@@ -244,10 +319,10 @@ export class AppComponent implements AfterViewChecked {
                   userList[item.UserId].roomId[item.RoomUserId] = item.RoomId;
                 }
               });
-  
+
               this.userList = Object.values(userList);
               localStorage.setItem('userList', JSON.stringify(this.userList));
-  
+
               if (this.userList && this.phone) {
                 this.currentUser = this.userList.find(
                   (user) => user.phone === this.phone.toString()
@@ -273,7 +348,7 @@ export class AppComponent implements AfterViewChecked {
       );
     });
   }
-  
+
 
   loadMessagesFromStorage(): void {
     this.storageArray = this.chatService.getStorage();
@@ -314,7 +389,7 @@ export class AppComponent implements AfterViewChecked {
   }
 
   valueRecievedOutput(value) {
-    console.log('value', value);
+    // console.log('value', value);
     this.phone = value.phone;
     this.showScreen = value.showScreen;
     this.login();
@@ -325,12 +400,12 @@ export class AppComponent implements AfterViewChecked {
   }
 
   login(): void {
-    this.getUserRoomIdAndDetailsPromise().then(()=>{
+    this.getUserRoomIdAndDetailsPromise().then(() => {
       this.currentUser = this.userList.find((user) => user.phone === this.phone.toString());
       this.loginUser = this.userList.filter((user) => user.phone == this.phone.toString());
       this.userList = this.userList.filter((user) => user.phone !== this.phone.toString());
-  
-      console.log(this.loginUser);
+
+      // console.log(this.loginUser);
       if (this.currentUser) {
         this.showScreen = true;
         console.log('this.showScreen', this.showScreen);
@@ -353,41 +428,41 @@ export class AppComponent implements AfterViewChecked {
     this.messageArray = [];
 
     this.storageArray = this.chatService.getStorage();
-    const storeIndex = this.storageArray 
+    const storeIndex = this.storageArray
       .findIndex((storage) => storage.roomId === this.roomId);
 
     if (storeIndex > -1) {
       this.messageArray = this.storageArray[storeIndex].chats;
     }
     this.join(this.currentUser.name, this.roomId);
-    console.log('storageArray""""""" ',this.storageArray)
+    // console.log('storageArray""""""" ', this.storageArray)
   }
 
   selectUserHandlerForSendMsg(phone: string): void {
     this.getUserRoomIdAndDetailsPromise().then(() => {
       const userList = JSON.parse(localStorage.getItem('userList') || '[]');
-  
+
       this.selectedUser = userList.find(user => user.phone === phone);
       if (!this.selectedUser || !this.currentUser) {
         console.error('Selected user or current user not found.');
         return;
       }
-  
+
       this.roomId = this.selectedUser.roomId[this.currentUser.id];
       this.messageArray = [];
-  
+
       this.storageArray = this.chatService.getStorage();
       const storeIndex = this.storageArray.findIndex(
         (storage) => storage.roomId === this.roomId
       );
-  
+
       if (storeIndex > -1) {
         this.messageArray = this.storageArray[storeIndex].chats;
       }
       this.join(this.currentUser.name, this.roomId);
     });
   }
-  
+
 
   join(username: string, roomId: string): void {
     this.chatService.joinRoom({ user: username, room: roomId });
@@ -413,7 +488,7 @@ export class AppComponent implements AfterViewChecked {
     });
 
     if (this.replyText.trim()) {
-      console.log('Message sent:', this.replyText);
+      // console.log('Message sent:', this.replyText);
       this.replyText = ''; // Clear the textarea
     }
 
@@ -433,7 +508,7 @@ export class AppComponent implements AfterViewChecked {
         roomId: this.roomId,
         chats: [newMessage]
       };
-      console.log(updateStorage);
+      // console.log(updateStorage);
       this.storageArray.push(updateStorage);
     }
 
@@ -446,7 +521,7 @@ export class AppComponent implements AfterViewChecked {
     this.search = '';
 
     let userName = this.userListWithFilterUser.find(res => res.name == user.name && res.phone == user.phone);
-    if(userName){
+    if (userName) {
       this.selectUserHandler(user.phone);
       return;
     }
@@ -454,9 +529,6 @@ export class AppComponent implements AfterViewChecked {
     const datePart = new Date().getTime().toString(36);
     const randomPart = Math.random().toString(36).substring(2, 7);
     const room_id = `RoomId-${datePart}-${randomPart}`;
-
-    console.log('Search user >>>', user);
-    console.log('room_id >>>', room_id);
 
     let obj = {
       "data": {
@@ -471,13 +543,13 @@ export class AppComponent implements AfterViewChecked {
       }
     }
     this.api.post('index/json', obj).subscribe(res => {
-      console.log(res['results'].data[0].results);
-      this.getUserRoomIdAndDetailsPromise().then(()=>{
+      // console.log(res['results'].data[0].results);
+      this.getUserRoomIdAndDetailsPromise().then(() => {
         this.roomId = room_id
         setTimeout(() => {
           this.filteredUserList();
         }, 10);
-        alert(res['results'].data[0].results);
+        // alert(res['results'].data[0].results);
       });
     });
   }
@@ -494,9 +566,9 @@ export class AppComponent implements AfterViewChecked {
     //   Object.keys(user.roomId).some(roomId => currentUserRoomIds.includes(roomId))
     // );
     // this.userListWithFilterUser = filterUser.filter((user) => user.phone !== this.phone.toString());
-    console.log('userListWithFilterUser', this.userListWithFilterUser)
+    // console.log('userListWithFilterUser', this.userListWithFilterUser)
   }
-  logout(){
+  logout() {
     localStorage.removeItem('user');
     this.showScreen = false;
   }
@@ -504,6 +576,17 @@ export class AppComponent implements AfterViewChecked {
     if (this.timer) {
       clearInterval(this.timer);
     }
+    // Clear the interval and unsubscribe to prevent memory leaks
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+    if (this.apiSubscriptionPortfolio) {
+      this.apiSubscriptionPortfolio.unsubscribe();
+    }
+    if (this.apiSubscriptionChatApp) {
+      this.apiSubscriptionChatApp.unsubscribe();
+    }
   }
-
 }
+
+

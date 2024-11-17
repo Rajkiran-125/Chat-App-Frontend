@@ -177,7 +177,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 10px 10px 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #fb7777;
   border-radius: 4px;
   margin-bottom: 20px;
   transition: 0.3s;
@@ -228,7 +228,8 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  color: darken(#8c7569, 5%);
+  // color: darken(#8c7569, 5%);
+  color: #fb7777;
   font-size: 32px;
   font-weight: 800;
   transform: translate(-50%, -50%);
