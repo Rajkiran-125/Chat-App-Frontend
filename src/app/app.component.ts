@@ -530,9 +530,6 @@ export class AppComponent implements AfterViewChecked {
     const randomPart = Math.random().toString(36).substring(2, 7);
     const room_id = `RoomId-${datePart}-${randomPart}`;
 
-    // console.log('Search user >>>', user);
-    // console.log('room_id >>>', room_id);
-
     let obj = {
       "data": {
         "spname": "sp_ca_createRoomId",
@@ -552,7 +549,7 @@ export class AppComponent implements AfterViewChecked {
         setTimeout(() => {
           this.filteredUserList();
         }, 10);
-        alert(res['results'].data[0].results);
+        // alert(res['results'].data[0].results);
       });
     });
   }

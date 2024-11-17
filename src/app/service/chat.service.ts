@@ -10,8 +10,8 @@ import { HttpClient } from '@angular/common/http';
 export class ChatService {
   
   private socket: Socket;
-  private url = 'http://localhost:3000'; // your server local path
-  // private url = 'https://chat-app-node-socket-io-5m2o.onrender.com'; // your server local path
+  // private url = 'http://localhost:3000'; // your server local path
+  private url = 'https://chat-app-node-socket-io-5m2o.onrender.com'; // your server local path
 
   constructor(
     private http: HttpClient
