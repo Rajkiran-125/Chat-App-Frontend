@@ -63,12 +63,15 @@
 
       <div class="pull-left hidden-xs" *ngIf="selectedUser">
         <img [src]="selectedUser?.image" alt="" class="img-avatar m-r-10">
-        <div class="lv-avatar pull-left">
+        <!-- <div class="lv-avatar pull-left">
+          {{selectedUser | json}}
+        </div> -->
+        <div class="">
 
+          <span>{{selectedUser.name}}</span>
+          <br>
+          <span [ngClass]="{'online': selectedUser.status === 'online', 'offline': selectedUser.status === 'offline'}">{{selectedUser.status || 'offline'}}</span>
         </div>
-        <span>{{selectedUser.name}}</span>
-        <!-- <br>
-        <span>{{selectedUser.status}}</span> -->
       </div>
       <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
 

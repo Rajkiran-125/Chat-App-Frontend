@@ -212,6 +212,7 @@ export class AppComponent implements AfterViewChecked {
         currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
       );
     }
+  
 
     console.log('Updated currentUser:', this.currentUser);
     console.log('Updated loginUser:', this.loginUser);
