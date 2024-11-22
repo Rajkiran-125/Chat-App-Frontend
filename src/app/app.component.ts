@@ -212,8 +212,18 @@ export class AppComponent implements AfterViewChecked {
         currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
       );
     }
+
+    // this.userList.forEach((user) =>{
+    //   let matchUser = this.selectedUser.find((sUser) => sUser.name == user.name);
+    //   if(matchUser) matchUser.status = user.status
+    // })
+    
+    let matchUser = this.userList.find((user) => this.selectedUser.name == user.name);
+    
+    this.selectedUser.status = matchUser.status
   
 
+    console.log('Updated selectedUser:', this.selectedUser);
     console.log('Updated currentUser:', this.currentUser);
     console.log('Updated loginUser:', this.loginUser);
     console.log('Updated userListWithFilterUser:', this.userListWithFilterUser);
