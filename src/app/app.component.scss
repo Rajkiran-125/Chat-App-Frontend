@@ -351,7 +351,7 @@ img{
   display: block; /* Default to visible */
 }
 
-@media (min-width: 992px) { /* Adjust min-width based on your desktop breakpoint */
+@media (min-width: 767px) { /* Adjust min-width based on your desktop breakpoint */
   #ms-menu-trigger {
       display: none; /* Hide on desktop screens */
   }
@@ -373,7 +373,7 @@ img{
 }
 
 /* Adjust height for mobile screens */
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .msg-body {
     height: 75vh;
     // height: calc(100vh -170px);
@@ -415,7 +415,7 @@ img{
   background: #e3e3e3;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .user-notSelected {
     font-size: 1em;
     /* Smaller font size for mobile */

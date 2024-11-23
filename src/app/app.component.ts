@@ -15,7 +15,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.13'
+  version: string = 'V.0.0.14'
   search: any;
 
   public roomId: string;
@@ -217,11 +217,10 @@ export class AppComponent implements AfterViewChecked {
     //   let matchUser = this.selectedUser.find((sUser) => sUser.name == user.name);
     //   if(matchUser) matchUser.status = user.status
     // })
-    
+
     let matchUser = this.userList.find((user) => this.selectedUser.name == user.name);
-    
+
     this.selectedUser.status = matchUser.status
-  
 
     console.log('Updated selectedUser:', this.selectedUser);
     console.log('Updated currentUser:', this.currentUser);
@@ -449,28 +448,35 @@ export class AppComponent implements AfterViewChecked {
     // console.log('storageArray""""""" ', this.storageArray)
   }
 
-  selectUserHandlerForSendMsg(phone: string): void {
-    this.getUserRoomIdAndDetailsPromise().then(() => {
-      const userList = JSON.parse(localStorage.getItem('userList') || '[]');
+  selectUserHandlerForSendMsg(phone: string): Promise<void> {
+    return new Promise((resolve, reject) => {
 
-      this.selectedUser = userList.find(user => user.phone === phone);
-      if (!this.selectedUser || !this.currentUser) {
-        console.error('Selected user or current user not found.');
-        return;
-      }
+      this.getUserRoomIdAndDetailsPromise().then(() => {
+        const userList = JSON.parse(localStorage.getItem('userList') || '[]');
 
-      this.roomId = this.selectedUser.roomId[this.currentUser.id];
-      this.messageArray = [];
+        this.selectedUser = userList.find(user => user.phone === phone);
+        if (!this.selectedUser || !this.currentUser) {
+          console.error('Selected user or current user not found.');
+          return;
+        }
 
-      this.storageArray = this.chatService.getStorage();
-      const storeIndex = this.storageArray.findIndex(
-        (storage) => storage.roomId === this.roomId
-      );
+        this.roomId = this.selectedUser.roomId[this.currentUser.id];
+        this.messageArray = [];
 
-      if (storeIndex > -1) {
-        this.messageArray = this.storageArray[storeIndex].chats;
-      }
-      this.join(this.currentUser.name, this.roomId);
+        this.storageArray = this.chatService.getStorage();
+        const storeIndex = this.storageArray.findIndex(
+          (storage) => storage.roomId === this.roomId
+        );
+
+        if (storeIndex > -1) {
+          this.messageArray = this.storageArray[storeIndex].chats;
+        }
+        this.join(this.currentUser.name, this.roomId);
+        resolve();
+      }).catch(err => {
+        console.log(err);
+        reject();
+      })
     });
   }
 
@@ -485,46 +491,49 @@ export class AppComponent implements AfterViewChecked {
 
   sendMessage(): void {
 
-    this.selectUserHandlerForSendMsg(this.selectedUser.phone);
-    // this.selectedUser = this.userList.find(user => user.phone === this.selectedUser.phone);
-    if (!this.messageText.trim()) return;
+    this.selectUserHandlerForSendMsg(this.selectedUser.phone).then(() => {
+      // this.selectedUser = this.userList.find(user => user.phone === this.selectedUser.phone);
+      if (!this.messageText.trim()) return;
 
-    const date = this.dateTime.toISOString();
+      const date = this.dateTime.toISOString();
 
-    this.chatService.sendMessage({
-      user: this.currentUser.name,
-      room: this.roomId,
-      message: this.messageText,
-      dateTime: date
-    });
+      this.chatService.sendMessage({
+        user: this.currentUser.name,
+        room: this.roomId,
+        message: this.messageText,
+        dateTime: date
+      });
 
-    if (this.replyText.trim()) {
-      // console.log('Message sent:', this.replyText);
-      this.replyText = ''; // Clear the textarea
-    }
+      if (this.replyText.trim()) {
+        // console.log('Message sent:', this.replyText);
+        this.replyText = ''; // Clear the textarea
+      }
 
-    this.storageArray = this.chatService.getStorage();
-    const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
+      this.storageArray = this.chatService.getStorage();
+      const storeIndex = this.storageArray.findIndex((storage) => storage.roomId === this.roomId);
 
-    const newMessage = {
-      user: this.currentUser.name,
-      message: this.messageText,
-      dateTime: date
-    };
-
-    if (storeIndex > -1) {
-      this.storageArray[storeIndex].chats.push(newMessage);
-    } else {
-      const updateStorage = {
-        roomId: this.roomId,
-        chats: [newMessage]
+      const newMessage = {
+        user: this.currentUser.name,
+        message: this.messageText,
+        dateTime: date
       };
-      // console.log(updateStorage);
-      this.storageArray.push(updateStorage);
-    }
 
-    this.chatService.setStorage(this.storageArray);
-    this.messageText = '';
+      if (storeIndex > -1) {
+        this.storageArray[storeIndex].chats.push(newMessage);
+      } else {
+        const updateStorage = {
+          roomId: this.roomId,
+          chats: [newMessage]
+        };
+        // console.log(updateStorage);
+        this.storageArray.push(updateStorage);
+      }
+
+      this.chatService.setStorage(this.storageArray);
+      this.messageText = '';
+    }).catch((err) => {
+      console.log(err)
+    })
   }
 
   createRoom(user) {

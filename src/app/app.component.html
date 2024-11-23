@@ -134,12 +134,10 @@
 
 
       <div class="msg-body" #msgBody>
-        <!-- {{currentUser | json}}
-          <br>
-          <br>
-          {{messageArray | json}}
-          <br>
-          {{selectedUser | json}} -->
+        <!-- Current User: {{currentUser | json}}
+        <br>
+        <br>
+        Selected User: {{selectedUser | json}} -->
         <div class="message-feed " *ngFor="let item of messageArray"
           [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
           <!-- <div class="pull-left">
