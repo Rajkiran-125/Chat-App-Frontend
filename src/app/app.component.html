@@ -16,6 +16,7 @@
         </select> -->
         <div class="search-results">
           <p style="cursor: pointer;" *ngFor="let user of userList | filter: search" (click)="createRoom(user)">
+            <img [src]="user?.image" alt="" class="img-avatar">
             {{user.name}}</p>
         </div>
         <!-- <ul>
@@ -78,8 +79,8 @@
         </div>
         <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
 
-        <div *ngIf="!selectedUser && serverWaiting">
-          <span style="color: #fff;"><sup>*</sup>Free instance will spin down with inactivity, which can delay requests by 30
+        <div *ngIf="!selectedUser && serverWalkUp">
+          <span style="color: #fff;"><sup>*</sup>Instance will spin down with inactivity, which can delay requests by 30
             seconds or more.
           </span>
         </div>

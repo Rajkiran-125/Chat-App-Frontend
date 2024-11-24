@@ -35,7 +35,7 @@ export class AppComponent implements AfterViewChecked {
   userList: any;
   menuToggled = true;
   replyText = '';
-  serverWaiting:boolean = true;
+  serverWalkUp:boolean = true;
 
   private intervalId: any;
   private apiSubscriptionPortfolio: Subscription | null = null;
@@ -123,6 +123,7 @@ export class AppComponent implements AfterViewChecked {
 
   ngOnInit(): void {
     this.startTimer();
+    this.serverWalkUp = this.chatService.serverWalkUp;
     // this.getUserList();
     this.getUserRoomIdAndDetailsByPhone();
     // Subscribe to new messages, but only process them if they match the current roomId
@@ -256,7 +257,8 @@ export class AppComponent implements AfterViewChecked {
 
     this.api.post('index/json', obj).subscribe(res => {
       if (res['code'] === 200) {
-        this.serverWaiting = false;
+        this.serverWalkUp = false;
+        this.chatService.serverWalkUp = false;
         const rawData = res['results'].data;
         if (rawData && rawData.length > 0) {
           let userList = {};
