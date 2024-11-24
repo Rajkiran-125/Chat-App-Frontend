@@ -1,0 +1,25 @@
+.svg-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999999999999999;
+    background: rgba(255, 255, 255, 0.8); 
+  }
+  svg {
+    width: 200px;
+    height: 200px;
+    margin: 20px;
+    display: inline-block;
+    fill: var(--primary_color);
+  }
+  @media screen and (max-width:767px) {
+    svg {
+      width: 100px;
+      height: 100px;
+    }
+  }

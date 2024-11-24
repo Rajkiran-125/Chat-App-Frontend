@@ -1,3 +1,4 @@
+<app-loader *ngIf="loader"></app-loader>
 <div class="container bootstrap snippets bootdey" *ngIf="showScreen">
   <div class="tile tile-alt" id="messages-main">
     <div class="ms-menu" [class.toggled]="menuToggled">
@@ -40,7 +41,7 @@
       </div>
       <div *ngFor="let user of userStatusMap | keyvalue">
         <p style="color: #fff;">
-          {{ user.key }} is 
+          {{ user.key }} is
           <span [ngClass]="{'online': user.value === 'online', 'offline': user.value === 'offline'}">
             {{ user.value }}
           </span>
@@ -54,37 +55,45 @@
       </div>
 
     </div>
-  
-  <div class="ms-body">
-    <div class="action-header clearfix">
-      <div class="visible-xs" (click)="toggleMenu()" id="ms-menu-trigger">
-        <i class="fa fa-bars" style="color: #fff;"></i>
-      </div>
 
-      <div class="pull-left hidden-xs" *ngIf="selectedUser">
-        <img [src]="selectedUser?.image" alt="" class="img-avatar m-r-10">
-        <!-- <div class="lv-avatar pull-left">
+    <div class="ms-body">
+      <div class="action-header clearfix">
+        <div class="visible-xs" (click)="toggleMenu()" id="ms-menu-trigger">
+          <i class="fa fa-bars" style="color: #fff;"></i>
+        </div>
+
+        <div class="pull-left hidden-xs" *ngIf="selectedUser">
+          <img [src]="selectedUser?.image" alt="" class="img-avatar m-r-10">
+          <!-- <div class="lv-avatar pull-left">
           {{selectedUser | json}}
         </div> -->
-        <div class="">
+          <div class="">
 
-          <span>{{selectedUser.name}}</span>
-          <br>
-          <span [ngClass]="{'online': selectedUser.status === 'online', 'offline': selectedUser.status === 'offline'}">{{selectedUser.status || 'offline'}}</span>
+            <span>{{selectedUser.name}}</span>
+            <br>
+            <span
+              [ngClass]="{'online': selectedUser.status === 'online', 'offline': selectedUser.status === 'offline'}">{{selectedUser.status
+              || 'offline'}}</span>
+          </div>
         </div>
-      </div>
-      <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
+        <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
 
-      <!-- roomId: {{roomId}} -->
-      <ul class="ah-actions actions">
-        <li>
-          <span style="color: #fff;">{{version}}</span>
+        <div *ngIf="!selectedUser && serverWaiting">
+          <span style="color: #fff;"><sup>*</sup>Free instance will spin down with inactivity, which can delay requests by 30
+            seconds or more.
+          </span>
+        </div>
 
-        </li>
-        <li class="logout" (click)="logout()" title="Logout">
-          <i class="fa-solid fa-right-from-bracket"></i>
-        </li>
-        <!-- <li>
+        <!-- roomId: {{roomId}} -->
+        <ul class="ah-actions actions">
+          <li>
+            <span style="color: #fff;">{{version}}</span>
+
+          </li>
+          <li class="logout" (click)="logout()" title="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </li>
+          <!-- <li>
             <a href="">
               <i class="fa fa-trash"></i>
             </a>
@@ -127,32 +136,33 @@
               </li>
             </ul>
           </li> -->
-      </ul>
-    </div>
+        </ul>
+      </div>
 
-    <div class="chat-box" *ngIf="selectedUser">
+      <div class="chat-box" *ngIf="selectedUser">
 
 
-      <div class="msg-body" #msgBody>
-        <!-- Current User: {{currentUser | json}}
+        <div class="msg-body" #msgBody>
+          <!-- Current User: {{currentUser | json}}
         <br>
         <br>
         Selected User: {{selectedUser | json}} -->
-        <div class="message-feed " *ngFor="let item of messageArray"
-          [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
-          <!-- <div class="pull-left">
+          <div class="message-feed " *ngFor="let item of messageArray"
+            [ngClass]="item?.user === currentUser?.name ? 'right' : 'media'">
+            <!-- <div class="pull-left">
               <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="img-avatar">
             </div> -->
-          <!-- {{item?.user}} , {{currentUser?.name}} -->
-          <div class="media-body">
-            <div class="mf-content">
-              {{item?.message}}
+            <!-- {{item?.user}} , {{currentUser?.name}} -->
+            <div class="media-body">
+              <div class="mf-content">
+                {{item?.message}}
+              </div>
+              <small class="mf-date"><i class="fa fa-clock-o"></i> {{item.dateTime | date: "hh:mm:ss
+                dd:MM:yyyy"}}</small>
             </div>
-            <small class="mf-date"><i class="fa fa-clock-o"></i> {{item.dateTime | date: "hh:mm:ss dd:MM:yyyy"}}</small>
           </div>
-        </div>
 
-        <!-- <div class="message-feed right">
+          <!-- <div class="message-feed right">
           <div class="pull-right">
             <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="" class="img-avatar">
           </div>
@@ -164,26 +174,26 @@
             <small class="mf-date"><i class="fa fa-clock-o"></i> 20/02/2015 at 09:30</small>
           </div>
         </div> -->
-      </div>
+        </div>
 
-      <div class="msb-reply">
-        <!-- <textarea placeholder="What's on your mind..."></textarea> -->
-        <input type="text" placeholder="Type a message" class="form-control" [(ngModel)]="messageText"
-          (keyup)="$event.keyCode === 13 && sendMessage()" />
-        <button (click)="messageText !== '' ? sendMessage() : ''"><i class="fa fa-paper-plane-o"></i></button>
-      </div>
-      <div>
-        <a href=""></a>
-      </div>
+        <div class="msb-reply">
+          <!-- <textarea placeholder="What's on your mind..."></textarea> -->
+          <input type="text" placeholder="Type a message" class="form-control" [(ngModel)]="messageText"
+            (keyup)="$event.keyCode === 13 && sendMessage()" />
+          <button (click)="messageText !== '' ? sendMessage() : ''"><i class="fa fa-paper-plane-o"></i></button>
+        </div>
+        <div>
+          <a href=""></a>
+        </div>
 
-    </div>
-    <div class="" *ngIf="!selectedUser ">
-      <div class="user-notSelected">
-        <span>Please select user to chat</span>
+      </div>
+      <div class="" *ngIf="!selectedUser ">
+        <div class="user-notSelected">
+          <span>Please select user to chat</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </div>
 
 <app-login [showScreen]="showScreen" (valueEmitter)="valueRecievedOutput($event)"></app-login>

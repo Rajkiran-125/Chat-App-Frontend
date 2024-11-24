@@ -8,13 +8,15 @@ import { ChatRoomComponent } from './chat-room/chat-room.component';
 import { LoginComponent } from './login/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FilterPipe } from './filter.pipe';
+import { LoaderComponent } from './loader/loader.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ChatRoomComponent,
     LoginComponent,
-    FilterPipe
+    FilterPipe,
+    LoaderComponent
   ],
   imports: [
     BrowserModule,

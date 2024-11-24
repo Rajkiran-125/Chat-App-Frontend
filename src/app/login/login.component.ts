@@ -11,6 +11,7 @@ export class LoginComponent {
   isOpened = false;
   phone: any;
   tab: string = 'login';
+  loader:boolean = false;
 
   userName;
   phoneNumber;
@@ -19,9 +20,9 @@ export class LoginComponent {
 
   profilePics = [
     'https://bootdey.com/img/Content/avatar/avatar1.png',
-    'https://bootdey.com/img/Content/avatar/avatar2.png',
+    'https://bootdey.com/img/Content/avatar/avatar7.png',
     'https://bootdey.com/img/Content/avatar/avatar3.png',
-    'https://bootdey.com/img/Content/avatar/avatar4.png',
+    'https://bootdey.com/img/Content/avatar/avatar8.png',
     'https://bootdey.com/img/Content/avatar/avatar5.png',
     'https://bootdey.com/img/Content/avatar/avatar6.png'
   ]
@@ -54,7 +55,7 @@ export class LoginComponent {
 
   signUp() {
     console.log('signUp');
-
+    this.loader = true;
     if (this.userName && this.phoneNumber && this.selectedProfilePic) {
 
       let json_data = {
@@ -74,6 +75,7 @@ export class LoginComponent {
       this.api.post('index/json', obj).subscribe(res => {
         this.getUserRoomIdAndDetailsByPhone();
         console.log(res['results'].data[0].results);
+        this.loader = false;
         alert('Signup success');
         this.tab = 'login'
         this.userName = '';
@@ -82,6 +84,7 @@ export class LoginComponent {
       });
     }else{
       alert('Please fill the require field');
+      this.loader = false;
     }
   }
 
@@ -142,7 +145,7 @@ export class LoginComponent {
 
   login() {
     // Emit the phone number to the parent component
-    
+    this.loader = true;
     this.userList = JSON.parse(localStorage.getItem('userList'));
 
     if(this.userList){
@@ -158,18 +161,19 @@ export class LoginComponent {
         }
         localStorage.setItem('user',JSON.stringify(this.phone));
         this.valueEmitter.emit(obj);
+        this.loader = false;
       } else {
 
         alert('Login failed: No user with this phone number found')
         console.log('Login failed: No user with this phone number found');
-
+        this.loader = false;
         // Handle login failure
       }
     }else {
 
       alert('Login failed: No user with this phone number found')
       console.log('Login failed: No user with this phone number found');
-
+      this.loader = false;
       // Handle login failure
     }
   }

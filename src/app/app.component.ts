@@ -17,6 +17,7 @@ export class AppComponent implements AfterViewChecked {
   isOpened = false;
   version: string = 'V.0.0.14'
   search: any;
+  loader:boolean = false;
 
   public roomId: string;
   public messageText: string;
@@ -34,6 +35,7 @@ export class AppComponent implements AfterViewChecked {
   userList: any;
   menuToggled = true;
   replyText = '';
+  serverWaiting:boolean = true;
 
   private intervalId: any;
   private apiSubscriptionPortfolio: Subscription | null = null;
@@ -195,11 +197,6 @@ export class AppComponent implements AfterViewChecked {
   }
 
   refreshRelatedUserProperties(): void {
-    // Update currentUser
-    // if (this.phone) {
-    //   this.currentUser = this.userList.find(user => user.phone === this.phone.toString());
-    // }
-    // this.selectedUser = this.userList.find(user => user.phone === this.phone);
     // Update loginUser
     if (this.phone) {
       this.loginUser = this.userList.filter(user => user.phone === this.phone.toString());
@@ -211,12 +208,7 @@ export class AppComponent implements AfterViewChecked {
       this.userListWithFilterUser = this.userList.filter(user =>
         currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
       );
-    }
-
-    // this.userList.forEach((user) =>{
-    //   let matchUser = this.selectedUser.find((sUser) => sUser.name == user.name);
-    //   if(matchUser) matchUser.status = user.status
-    // })
+    };
 
     let matchUser = this.userList.find((user) => this.selectedUser.name == user.name);
 
@@ -264,6 +256,7 @@ export class AppComponent implements AfterViewChecked {
 
     this.api.post('index/json', obj).subscribe(res => {
       if (res['code'] === 200) {
+        this.serverWaiting = false;
         const rawData = res['results'].data;
         if (rawData && rawData.length > 0) {
           let userList = {};
@@ -582,11 +575,6 @@ export class AppComponent implements AfterViewChecked {
     this.userListWithFilterUser = this.userList.filter(user =>
       currentUserRoomIds.includes(user.id.toString()) && user.phone !== this.currentUser.phone
     );
-    // let filterUser = this.userList.filter(user =>
-    //   Object.keys(user.roomId).some(roomId => currentUserRoomIds.includes(roomId))
-    // );
-    // this.userListWithFilterUser = filterUser.filter((user) => user.phone !== this.phone.toString());
-    // console.log('userListWithFilterUser', this.userListWithFilterUser)
   }
   logout() {
     localStorage.removeItem('user');
