@@ -73,14 +73,24 @@ export class LoginComponent {
       };
 
       this.api.post('index/json', obj).subscribe(res => {
-        this.getUserRoomIdAndDetailsByPhone();
-        console.log(res['results'].data[0].results);
-        this.loader = false;
-        alert('Signup success');
-        this.tab = 'login'
-        this.userName = '';
-        this.phoneNumber = '';
-        this.selectedProfilePic = '';
+        if(res['results'].data[0].results == 'Data insrted successfully'){
+
+          this.getUserRoomIdAndDetailsByPhone();
+          console.log(res['results'].data[0].results);
+          alert('Signup success');
+          this.tab = 'login';
+          this.userName = '';
+          this.phoneNumber = '';
+          this.selectedProfilePic = '';
+        }else if(res['results'].data[0].results == 'User already exist'){
+          this.loader = false;
+          this.tab = 'login';
+          this.phone = this.phoneNumber;
+          this.userName = '';
+          this.phoneNumber = '';
+          this.selectedProfilePic = '';
+          alert('User already exist');
+        }
       });
     }else{
       alert('Please fill the require field');
