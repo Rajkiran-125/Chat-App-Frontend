@@ -40,14 +40,14 @@
         </a>
 
       </div>
-      <div *ngFor="let user of userStatusMap | keyvalue">
+      <!-- <div *ngFor="let user of userStatusMap | keyvalue">
         <p style="color: #fff;">
           {{ user.key }} is
           <span [ngClass]="{'online': user.value === 'online', 'offline': user.value === 'offline'}">
             {{ user.value }}
           </span>
         </p>
-      </div>
+      </div> -->
       <!-- footer -->
       <div class="ms-footer">
         <!-- <button (click)="toggleMenu()">Toggle Menu</button> -->
@@ -79,11 +79,11 @@
         </div>
         <!-- {{dateTime | date: "hh:mm:ss dd:MM:yyyy"}} -->
 
-        <div *ngIf="!selectedUser && serverWalkUp">
+        <!-- <div *ngIf="!selectedUser">
           <span style="color: #fff;"><sup>*</sup>Instance will spin down with inactivity, which can delay requests by 30
             seconds or more.
           </span>
-        </div>
+        </div> -->
 
         <!-- roomId: {{roomId}} -->
         <ul class="ah-actions actions">

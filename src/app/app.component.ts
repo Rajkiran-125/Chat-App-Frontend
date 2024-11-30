@@ -17,7 +17,7 @@ export class AppComponent implements AfterViewChecked {
   isOpened = false;
   version: string = 'V.0.0.14'
   search: any;
-  loader:boolean = false;
+  loader: boolean = false;
 
   public roomId: string;
   public messageText: string;
@@ -35,7 +35,6 @@ export class AppComponent implements AfterViewChecked {
   userList: any;
   menuToggled = true;
   replyText = '';
-  serverWalkUp:boolean = true;
 
   private intervalId: any;
   private apiSubscriptionPortfolio: Subscription | null = null;
@@ -123,9 +122,10 @@ export class AppComponent implements AfterViewChecked {
 
   ngOnInit(): void {
     this.startTimer();
-    this.serverWalkUp = this.chatService.serverWalkUp;
+
     // this.getUserList();
     this.getUserRoomIdAndDetailsByPhone();
+
     // Subscribe to new messages, but only process them if they match the current roomId
     this.chatService.getMessage().subscribe((data: { user: string; room: string; message: string, dateTime: string }) => {
       // Ensure the incoming message is for the selected user's room
@@ -158,25 +158,6 @@ export class AppComponent implements AfterViewChecked {
       console.log('userStatusMap >>>> ', this.userStatusMap);
       this.updateUserStatus();
     });
-
-    this.intervalId = setInterval(() => {
-      this.apiSubscriptionPortfolio = this.api.porfolioApi().subscribe(
-        (response) => {
-          // console.log('apiSubscriptionPortfolio response:', response);
-        },
-        (error) => {
-          console.error('apiSubscriptionPortfolio error:', error);
-        }
-      );
-      this.apiSubscriptionChatApp = this.api.porfolioApi().subscribe(
-        (response) => {
-          // console.log('apiSubscriptionChatApp response:', response);
-        },
-        (error) => {
-          console.error('apiSubscriptionChatApp error:', error);
-        }
-      );
-    }, 60000); // 60000 milliseconds = 1 minute
 
     // Load existing messages from storage when component initializes
     this.loadMessagesFromStorage();
@@ -257,8 +238,6 @@ export class AppComponent implements AfterViewChecked {
 
     this.api.post('index/json', obj).subscribe(res => {
       if (res['code'] === 200) {
-        this.serverWalkUp = false;
-        this.chatService.serverWalkUp = false;
         const rawData = res['results'].data;
         if (rawData && rawData.length > 0) {
           let userList = {};
@@ -446,7 +425,7 @@ export class AppComponent implements AfterViewChecked {
   selectUserHandlerForSendMsg(phone: string): Promise<void> {
     return new Promise((resolve, reject) => {
 
-      this.getUserRoomIdAndDetailsPromise().then(() => {
+      if (this.roomId) {
         const userList = JSON.parse(localStorage.getItem('userList') || '[]');
 
         this.selectedUser = userList.find(user => user.phone === phone);
@@ -467,11 +446,39 @@ export class AppComponent implements AfterViewChecked {
           this.messageArray = this.storageArray[storeIndex].chats;
         }
         this.join(this.currentUser.name, this.roomId);
+
         resolve();
-      }).catch(err => {
-        console.log(err);
-        reject();
-      })
+        this.getUserRoomIdAndDetailsByPhone();
+      } else {
+
+        this.getUserRoomIdAndDetailsPromise().then(() => {
+          const userList = JSON.parse(localStorage.getItem('userList') || '[]');
+
+          this.selectedUser = userList.find(user => user.phone === phone);
+          if (!this.selectedUser || !this.currentUser) {
+            console.error('Selected user or current user not found.');
+            return;
+          }
+
+          this.roomId = this.selectedUser.roomId[this.currentUser.id];
+          this.messageArray = [];
+
+          this.storageArray = this.chatService.getStorage();
+          const storeIndex = this.storageArray.findIndex(
+            (storage) => storage.roomId === this.roomId
+          );
+
+          if (storeIndex > -1) {
+            this.messageArray = this.storageArray[storeIndex].chats;
+          }
+          this.join(this.currentUser.name, this.roomId);
+          resolve();
+
+        }).catch(err => {
+          console.log(err);
+          reject();
+        })
+      }
     });
   }
 
@@ -580,21 +587,16 @@ export class AppComponent implements AfterViewChecked {
   }
   logout() {
     localStorage.removeItem('user');
+    this.selectedUser = '';
+    this.currentUser = '';
     this.showScreen = false;
+    this.messageArray = [];
+    this.storageArray = [];
+    this.phone = '';
   }
   ngOnDestroy(): void {
     if (this.timer) {
       clearInterval(this.timer);
-    }
-    // Clear the interval and unsubscribe to prevent memory leaks
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-    if (this.apiSubscriptionPortfolio) {
-      this.apiSubscriptionPortfolio.unsubscribe();
-    }
-    if (this.apiSubscriptionChatApp) {
-      this.apiSubscriptionChatApp.unsubscribe();
     }
   }
 }

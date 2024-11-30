@@ -11,12 +11,12 @@ export class LoginComponent {
   isOpened = false;
   phone: any;
   tab: string = 'login';
-  loader:boolean = false;
+  loader: boolean = false;
 
   userName;
   phoneNumber;
   selectedProfilePic: string | null = null;
-  userList:any;
+  userList: any;
 
   profilePics = [
     'https://bootdey.com/img/Content/avatar/avatar1.png',
@@ -39,13 +39,15 @@ export class LoginComponent {
 
   ngOnInit(): void {
     const checkUser = JSON.parse(localStorage.getItem('user'));
-    if(checkUser){{
-      const obj = {
-        phone: checkUser,
-        showScreen: this.showScreen = true
+    if (checkUser) {
+      {
+        const obj = {
+          phone: checkUser,
+          showScreen: this.showScreen = true
+        }
+        this.valueEmitter.emit(obj);
       }
-      this.valueEmitter.emit(obj);
-    }}
+    }
   }
 
   selectProfilePic(img: string) {
@@ -73,26 +75,28 @@ export class LoginComponent {
       };
 
       this.api.post('index/json', obj).subscribe(res => {
-        if(res['results'].data[0].results == 'Data insrted successfully'){
+        if (res['results'].data[0].results == 'Data insrted successfully') {
 
           this.getUserRoomIdAndDetailsByPhone();
           console.log(res['results'].data[0].results);
-          alert('Signup success');
-          this.tab = 'login';
-          this.userName = '';
-          this.phoneNumber = '';
-          this.selectedProfilePic = '';
-        }else if(res['results'].data[0].results == 'User already exist'){
           this.loader = false;
+          alert('Signup success');
           this.tab = 'login';
           this.phone = this.phoneNumber;
           this.userName = '';
           this.phoneNumber = '';
           this.selectedProfilePic = '';
+        } else if (res['results'].data[0].results == 'User already exist') {
+          this.loader = false;
+          this.tab = 'login';
+          this.userName = '';
+          this.phone = this.phoneNumber;
+          this.phoneNumber = '';
+          this.selectedProfilePic = '';
           alert('User already exist');
         }
       });
-    }else{
+    } else {
       alert('Please fill the require field');
       this.loader = false;
     }
@@ -158,10 +162,10 @@ export class LoginComponent {
     this.loader = true;
     this.userList = JSON.parse(localStorage.getItem('userList'));
 
-    if(this.userList){
+    if (this.userList) {
 
       const matchingUser = this.userList.find(user => user.phone === this.phone);
-      
+
       if (matchingUser) {
         console.log('Login successful', matchingUser);
         // Proceed with login actions
@@ -169,7 +173,7 @@ export class LoginComponent {
           phone: this.phone,
           showScreen: this.showScreen = true
         }
-        localStorage.setItem('user',JSON.stringify(this.phone));
+        localStorage.setItem('user', JSON.stringify(this.phone));
         this.valueEmitter.emit(obj);
         this.loader = false;
       } else {
@@ -179,7 +183,7 @@ export class LoginComponent {
         this.loader = false;
         // Handle login failure
       }
-    }else {
+    } else {
 
       alert('Login failed: No user with this phone number found')
       console.log('Login failed: No user with this phone number found');

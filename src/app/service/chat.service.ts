@@ -8,8 +8,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class ChatService {
-  
-  serverWalkUp:boolean = true;
+
   
   private socket: Socket;
   // private url = 'http://localhost:3000'; // your server local path

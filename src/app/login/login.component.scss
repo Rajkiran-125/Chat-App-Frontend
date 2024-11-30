@@ -104,7 +104,8 @@ body {
     background: rgba(#333, 0.85);
 
     .modal-button {
-      opacity: 0;
+      // opacity: 0;
+      display: none;
     }
 
     .modal-container {
