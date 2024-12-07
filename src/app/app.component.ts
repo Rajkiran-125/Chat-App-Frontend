@@ -196,10 +196,10 @@ export class AppComponent implements AfterViewChecked {
 
     this.selectedUser.status = matchUser.status
 
-    console.log('Updated selectedUser:', this.selectedUser);
-    console.log('Updated currentUser:', this.currentUser);
-    console.log('Updated loginUser:', this.loginUser);
-    console.log('Updated userListWithFilterUser:', this.userListWithFilterUser);
+    // console.log('Updated selectedUser:', this.selectedUser);
+    // console.log('Updated currentUser:', this.currentUser);
+    // console.log('Updated loginUser:', this.loginUser);
+    // console.log('Updated userListWithFilterUser:', this.userListWithFilterUser);
   }
 
 
@@ -577,7 +577,7 @@ export class AppComponent implements AfterViewChecked {
   }
 
   // Function to filter users based on currentUser's id
-  userListWithFilterUser = [];
+  userListWithFilterUser:any;
   filteredUserList() {
     const currentUserRoomIds = Object.keys(this.currentUser?.roomId);
 

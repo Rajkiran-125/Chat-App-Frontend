@@ -25,7 +25,8 @@
       </div>
 
       <div class="list-group lg-alt">
-        <!-- {{filteredUserList | json}} -->
+        <div class="UserList-loader" *ngIf="!userListWithFilterUser"></div>
+        <!-- {{userListWithFilterUser | json}} -->
         <a class="user-list-menu media" [ngClass]="user?.phone === selectedUser?.phone && 'active'"
           *ngFor="let user of userListWithFilterUser" (click)="selectUserHandler(user?.phone); toggleMenu()">
           <div class="pull-left">
