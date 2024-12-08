@@ -15,7 +15,7 @@ export class AppComponent implements AfterViewChecked {
   title = 'chat-app';
 
   isOpened = false;
-  version: string = 'V.0.0.14'
+  version: string = 'V.0.0.15'
   search: any;
   loader: boolean = false;
 

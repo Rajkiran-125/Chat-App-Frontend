@@ -74,7 +74,7 @@ body {
     outline: 0;
     padding: 10px 40px;
     border-radius: 30px;
-    background: #fb7777;
+    background: var(--thame-color);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.16);
     transition: 0.3s;
     
@@ -154,7 +154,7 @@ body {
   border: 0;
   color: #fff;
   border-radius: 4px;
-  background: #fb7777;
+  background: var(--thame-color);
   font-family: "Nunito", sans-serif;
   transition: 0.3s;
   cursor: pointer;
@@ -178,7 +178,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 10px 10px 8px;
-  border: 1px solid #fb7777;
+  border: 1px solid var(--thame-color);
   border-radius: 4px;
   margin-bottom: 20px;
   transition: 0.3s;
@@ -217,7 +217,7 @@ body {
   padding: 0;
   cursor: pointer;
   svg{
-    color: #fb7777;
+    color: var(--thame-color);
   }
 }
 
@@ -230,7 +230,7 @@ body {
   align-items: center;
   text-align: center;
   // color: darken(#8c7569, 5%);
-  color: #fb7777;
+  color: var(--thame-color);
   font-size: 32px;
   font-weight: 800;
   transform: translate(-50%, -50%);
@@ -387,5 +387,5 @@ body {
   }
   
   .profilePic img.selected {
-    border-color: #fb7777;
+    border-color: var(--thame-color);
   }

@@ -133,7 +133,7 @@ img {
 }
 
 .message-feed.right .mf-content {
-  background: #fb7777;
+  background: var(--thame-color);
   color: #fff;
   border-radius: 15px 15px 0px 15px;
   box-shadow: -7px 6px 15px -4px gray;
@@ -157,7 +157,7 @@ img {
     font-family: inherit;
     font-size: inherit;
     line-height: inherit;
-    border: 2px solid #fb7777;
+    border: 2px solid var(--thame-color);
     border-radius: 15px;
     padding: 5px;
     box-shadow: inset 8px 8px 11px -2px #a7a7a7;
@@ -173,7 +173,7 @@ img {
   }
 
   input:focus {
-    border: 2px solid #fb7777;
+    border: 2px solid var(--thame-color);
     outline: none;
   }
 }
@@ -202,7 +202,7 @@ img {
 
   input {
     box-shadow: inset 8px 8px 11px -2px lightgray;
-    border: 2px solid #fb7777;
+    border: 2px solid var(--thame-color);
     // color: rgb(173, 173, 173);
     text-indent: 10px;
   }
@@ -214,7 +214,7 @@ img {
   }
 
   input:focus {
-    border: 2px solid #fb7777;
+    border: 2px solid var(--thame-color);
     outline: none;
   }
 }
@@ -527,18 +527,18 @@ img {
   color: red;
 }
 
-.UserList-loader {
-  border: 4px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 4px solid #fb7777;
-  width: 40px;
-  height: 40px;
-  // animation: _ngcontent-ng-c1125497744_spin 1s linear infinite;
-  -webkit-animation: spin 1s linear infinite;
-  /* Safari */
-  animation: spin 1s linear infinite;
-  margin: auto;
-}
+// .UserList-loader {
+//   border: 4px solid #f3f3f3;
+//   border-radius: 50%;
+//   border-top: 4px solid transparent;
+//   width: 40px;
+//   height: 40px;
+//   // animation: _ngcontent-ng-c1125497744_spin 1s linear infinite;
+//   -webkit-animation: spin 1s linear infinite;
+//   /* Safari */
+//   animation: spin 1s linear infinite;
+//   margin: auto;
+// }
 
 /* Safari */
 @-webkit-keyframes spin {
@@ -559,4 +559,20 @@ img {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* HTML: <div class="loader"></div> */
+.UserList-loader {
+  width: 40px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: 
+    radial-gradient(farthest-side,#ffde8b 94%,#0000) top/8px 8px no-repeat,
+    conic-gradient(#0000 30%,#ffde8b);
+  -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 6px),#000 0);
+  animation: l13 1s infinite linear;
+  margin: auto;
+}
+@keyframes l13{ 
+  100%{transform: rotate(1turn)}
 }
