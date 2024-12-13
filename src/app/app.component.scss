@@ -103,9 +103,9 @@ img {
   content: ""
 }
 
-.message-feed {
-  padding: 20px;
-}
+// .message-feed {
+//   padding: 20px;
+// }
 
 #footer,
 .fc-toolbar .ui-button,
@@ -134,14 +134,15 @@ img {
 
 .message-feed.right .mf-content {
   background: var(--thame-color);
-  color: #fff;
+  color: #000;
   border-radius: 15px 15px 0px 15px;
   box-shadow: -7px 6px 15px -4px gray;
   ;
 }
 
 .mf-content {
-  padding: 12px 17px 13px;
+  // padding: 12px 17px 13px;
+  padding: 6px 17px 9px;
   border-radius: 2px;
   display: inline-block;
   max-width: 80%;
@@ -233,7 +234,7 @@ img {
 .active {
   border-radius: 10px;
   box-shadow: 10px 11px 10px -6px white;
-  border: 01px solid #fff;
+  border: 1px solid var(--thame-color);
 }
 
 .four-zero,
@@ -377,7 +378,7 @@ img {
   overflow-y: auto;
   height: calc(95vh - 120px);
   /* Adjusted height considering header and footer */
-  padding: 10px;
+  padding: 20px;
   /* Optional padding for better spacing */
 }
 
