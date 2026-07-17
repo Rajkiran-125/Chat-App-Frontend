@@ -1,0 +1,122 @@
+<!-- No chat selected -->
+<div class="convo convo--empty" *ngIf="!(store.activeChat$ | async)">
+  <div class="convo__welcome">
+    <div class="convo__welcome-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    </div>
+    <h2>Your messages</h2>
+    <p>Pick a conversation from the left to start chatting.<br>Messages are delivered in real time.</p>
+  </div>
+</div>
+
+<!-- Active conversation -->
+<div class="convo" *ngIf="store.activeChat$ | async as chat">
+  <!-- Header -->
+  <header class="convo__header">
+    <button class="icon-btn convo__back" type="button" (click)="back()" aria-label="Back to chats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <button type="button" class="convo__peer" (click)="profileClick.emit()">
+      <app-avatar [src]="chat.avatar" [name]="chat.userName" [size]="42" [online]="chat.online"
+        [showPresence]="true" />
+      <span class="convo__peer-text">
+        <strong>{{ chat.userName }}</strong>
+        <small *ngIf="activeTyping$ | async; else presence" class="convo__typing">
+          typing<span class="typing-dots"><span></span><span></span><span></span></span>
+        </small>
+        <ng-template #presence>
+          <small *ngIf="chat.online" class="convo__online">online</small>
+          <small *ngIf="!chat.online && chat.lastSeenAt">last seen {{ chat.lastSeenAt | timeAgo }}</small>
+          <small *ngIf="!chat.online && !chat.lastSeenAt">offline</small>
+        </ng-template>
+      </span>
+    </button>
+  </header>
+
+  <!-- Messages -->
+  <div class="convo__feed" #feed>
+    <div class="convo__feed-loading" *ngIf="store.loadingMessages$ | async">
+      <span class="spinner spinner--accent"></span>
+    </div>
+
+    <ng-container *ngIf="!(store.loadingMessages$ | async)">
+      <!-- Empty conversation -->
+      <div class="convo__no-messages" *ngIf="(store.messages$ | async)?.length === 0">
+        <span>👋</span>
+        <p>No messages yet.<br>Say hi to {{ chat.userName.split(' ')[0] }}!</p>
+      </div>
+
+      <ng-container *ngFor="let item of feed$ | async; trackBy: trackFeed">
+        <div class="convo__separator" *ngIf="item.kind === 'separator'">
+          <span>{{ item.label }}</span>
+        </div>
+        <app-message-bubble *ngIf="item.kind === 'message'" [message]="item.message!"
+          [mine]="isMine(item.message!)" [firstOfGroup]="item.firstOfGroup!" [lastOfGroup]="item.lastOfGroup!"
+          (imageClick)="imageClick.emit($event)" (retryClick)="retry($event)" />
+      </ng-container>
+
+      <!-- Typing bubble -->
+      <div class="convo__typing-bubble" *ngIf="activeTyping$ | async">
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Pending image preview -->
+  <div class="convo__attachment" *ngIf="pendingImage">
+    <img [src]="pendingImage.previewUrl" alt="Image to send" />
+    <div class="convo__attachment-info">
+      <strong>{{ pendingImage.file.name }}</strong>
+      <small>Will be compressed and sent as a photo</small>
+    </div>
+    <button class="icon-btn" type="button" (click)="clearPendingImage()" aria-label="Remove image">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Composer -->
+  <footer class="convo__composer">
+    <app-emoji-picker *ngIf="emojiOpen" (picked)="addEmoji($event)" (closed)="emojiOpen = false" />
+
+    <button class="icon-btn" type="button" (click)="emojiOpen = !emojiOpen" title="Emoji" aria-label="Emoji picker">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+        <line x1="9" y1="9" x2="9.01" y2="9" />
+        <line x1="15" y1="9" x2="15.01" y2="9" />
+      </svg>
+    </button>
+
+    <label class="icon-btn convo__attach" title="Send a photo">
+      <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+      </svg>
+    </label>
+
+    <textarea #messageInput rows="1" placeholder="Type a message…" [(ngModel)]="messageText"
+      (ngModelChange)="onInputChange()" (keydown.enter)="onEnter($event)" aria-label="Message"></textarea>
+
+    <button class="convo__send" type="button" (click)="send()"
+      [disabled]="!messageText.trim() && !pendingImage" aria-label="Send message">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>
+    </button>
+  </footer>
+</div>

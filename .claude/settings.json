@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "C:\\Users\\rajkiranj\\Desktop\\Chat App\\Chat App Backend\\Chat-app-node-socket.io\\src\\utils",
+      "C:\\Users\\rajkiranj\\Desktop\\Chat App\\Chat App Backend\\Chat-app-node-socket.io\\src\\store"
+    ]
+  }
+}

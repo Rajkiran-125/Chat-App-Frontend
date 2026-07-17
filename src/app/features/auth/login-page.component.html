@@ -1,0 +1,118 @@
+<div class="auth">
+  <!-- Branding panel -->
+  <section class="auth__brand">
+    <div class="auth__brand-inner">
+      <div class="auth__logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      </div>
+      <h1>ChatApp</h1>
+      <p class="auth__tagline">Fast, beautiful, realtime conversations.<br>Catch up with your people — anywhere.</p>
+
+      <ul class="auth__features">
+        <li><span class="dot"></span> Realtime messaging &amp; typing indicators</li>
+        <li><span class="dot"></span> Read receipts and presence</li>
+        <li><span class="dot"></span> Share photos instantly</li>
+      </ul>
+    </div>
+    <div class="auth__bubbles" aria-hidden="true">
+      <div class="bubble bubble--in">Hey! Have you tried the new ChatApp? 👀</div>
+      <div class="bubble bubble--out">Just did — it's gorgeous! 🚀</div>
+      <div class="bubble bubble--in">Right? Dark mode is <b>so</b> clean ✨</div>
+    </div>
+  </section>
+
+  <!-- Form panel -->
+  <section class="auth__panel">
+    <button class="icon-btn auth__theme" type="button" (click)="theme.toggle()" title="Toggle theme"
+      aria-label="Toggle theme">
+      <svg *ngIf="(theme.theme$ | async) === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg *ngIf="(theme.theme$ | async) === 'dark'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="5" />
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+      </svg>
+    </button>
+
+    <div class="auth__card">
+      <div class="auth__tabs" role="tablist">
+        <button type="button" role="tab" [attr.aria-selected]="tab === 'login'" [class.active]="tab === 'login'"
+          (click)="switchTab('login')">Sign in</button>
+        <button type="button" role="tab" [attr.aria-selected]="tab === 'register'" [class.active]="tab === 'register'"
+          (click)="switchTab('register')">Create account</button>
+        <span class="auth__tab-ink" [class.right]="tab === 'register'"></span>
+      </div>
+
+      <!-- Sign in -->
+      <form *ngIf="tab === 'login'" class="auth__form" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <h2>Welcome back</h2>
+        <p class="auth__hint">Sign in with the phone number you registered with.</p>
+
+        <label class="field">
+          <span class="field__label">Phone number</span>
+          <input type="tel" formControlName="phone" placeholder="e.g. 9876543210" autocomplete="tel" />
+          <span class="field__error"
+            *ngIf="loginForm.controls.phone.touched && loginForm.controls.phone.invalid">
+            Enter a valid phone number (4–15 digits).
+          </span>
+        </label>
+
+        <button class="btn-primary auth__submit" type="submit" [disabled]="submitting$ | async">
+          <span class="spinner" *ngIf="submitting$ | async"></span>
+          {{ (submitting$ | async) ? 'Signing in…' : 'Sign in' }}
+        </button>
+
+        <p class="auth__switch">New here? <a role="button" tabindex="0" (click)="switchTab('register')"
+            (keyup.enter)="switchTab('register')">Create an account</a></p>
+      </form>
+
+      <!-- Register -->
+      <form *ngIf="tab === 'register'" class="auth__form" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+        <h2>Create your account</h2>
+        <p class="auth__hint">Pick a name, your phone number and an avatar.</p>
+
+        <label class="field">
+          <span class="field__label">Display name</span>
+          <input type="text" formControlName="userName" placeholder="e.g. Rajkiran Jaiswar" autocomplete="name"
+            maxlength="40" />
+          <span class="field__error"
+            *ngIf="registerForm.controls.userName.touched && registerForm.controls.userName.invalid">
+            Name must be 2–40 characters.
+          </span>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Phone number</span>
+          <input type="tel" formControlName="phone" placeholder="e.g. 9876543210" autocomplete="tel" />
+          <span class="field__error"
+            *ngIf="registerForm.controls.phone.touched && registerForm.controls.phone.invalid">
+            Enter a valid phone number (4–15 digits).
+          </span>
+        </label>
+
+        <div class="field">
+          <span class="field__label">Choose an avatar</span>
+          <div class="auth__avatars">
+            <button type="button" *ngFor="let avatar of avatars" class="auth__avatar"
+              [class.selected]="registerForm.controls.avatar.value === avatar" (click)="selectAvatar(avatar)">
+              <img [src]="avatar" alt="avatar option" />
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-primary auth__submit" type="submit" [disabled]="submitting$ | async">
+          <span class="spinner" *ngIf="submitting$ | async"></span>
+          {{ (submitting$ | async) ? 'Creating…' : 'Create account' }}
+        </button>
+
+        <p class="auth__switch">Already have an account? <a role="button" tabindex="0" (click)="switchTab('login')"
+            (keyup.enter)="switchTab('login')">Sign in</a></p>
+      </form>
+    </div>
+  </section>
+</div>

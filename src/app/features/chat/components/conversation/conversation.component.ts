@@ -1,0 +1,220 @@
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  OnDestroy,
+  Output,
+  ViewChild,
+  inject
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subscription, combineLatest, map } from 'rxjs';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { ChatStoreService } from 'src/app/core/services/chat-store.service';
+import { Message } from 'src/app/core/models/chat.models';
+import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
+import { TimeAgoPipe } from 'src/app/shared/pipes/time-ago.pipe';
+import { MessageBubbleComponent } from '../message-bubble/message-bubble.component';
+import { EmojiPickerComponent } from '../emoji-picker/emoji-picker.component';
+
+/** Flattened render list: date separators between day changes. */
+interface FeedItem {
+  kind: 'separator' | 'message';
+  label?: string;
+  message?: Message;
+  firstOfGroup?: boolean;
+  lastOfGroup?: boolean;
+}
+
+@Component({
+  selector: 'app-conversation',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    AvatarComponent,
+    TimeAgoPipe,
+    MessageBubbleComponent,
+    EmojiPickerComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './conversation.component.html',
+  styleUrls: ['./conversation.component.scss']
+})
+export class ConversationComponent implements AfterViewInit, OnDestroy {
+  store = inject(ChatStoreService);
+  auth = inject(AuthService);
+
+  @Output() profileClick = new EventEmitter<void>();
+  @Output() imageClick = new EventEmitter<string>();
+
+  @ViewChild('feed') private feedRef?: ElementRef<HTMLElement>;
+  @ViewChild('messageInput') private inputRef?: ElementRef<HTMLTextAreaElement>;
+
+  messageText = '';
+  emojiOpen = false;
+  pendingImage: { file: File; previewUrl: string } | null = null;
+
+  readonly feed$ = this.store.messages$.pipe(map((messages) => buildFeed(messages)));
+
+  /** True when the person in the ACTIVE chat is typing. */
+  readonly activeTyping$ = combineLatest([this.store.activeChat$, this.store.typing$]).pipe(
+    map(([chat, typing]) => !!chat?.roomId && typing.has(chat.roomId))
+  );
+
+  private subscription = new Subscription();
+
+  ngAfterViewInit(): void {
+    // Stick to the bottom whenever the feed changes.
+    this.subscription.add(
+      this.feed$.subscribe(() => queueMicrotask(() => this.scrollToBottom()))
+    );
+    this.subscription.add(
+      this.activeTyping$.subscribe(() => queueMicrotask(() => this.scrollToBottom(true)))
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    this.revokePendingImage();
+  }
+
+  isMine(message: Message): boolean {
+    return message.senderId === this.auth.currentUser?.id;
+  }
+
+  back(): void {
+    this.store.closeChat();
+  }
+
+  onInputChange(): void {
+    this.store.notifyTyping();
+    this.autoGrow();
+  }
+
+  onEnter(event: Event): void {
+    const keyboard = event as KeyboardEvent;
+    if (keyboard.shiftKey) return;
+    keyboard.preventDefault();
+    void this.send();
+  }
+
+  async send(): Promise<void> {
+    if (this.pendingImage) {
+      const file = this.pendingImage.file;
+      this.clearPendingImage();
+      await this.store.sendImage(file);
+    }
+    const text = this.messageText.trim();
+    if (text) {
+      this.messageText = '';
+      this.autoGrow();
+      await this.store.sendText(text);
+    }
+    this.inputRef?.nativeElement.focus();
+  }
+
+  addEmoji(emoji: string): void {
+    const input = this.inputRef?.nativeElement;
+    if (input) {
+      const start = input.selectionStart ?? this.messageText.length;
+      const end = input.selectionEnd ?? this.messageText.length;
+      this.messageText = this.messageText.slice(0, start) + emoji + this.messageText.slice(end);
+      queueMicrotask(() => {
+        input.focus();
+        const cursor = start + emoji.length;
+        input.setSelectionRange(cursor, cursor);
+      });
+    } else {
+      this.messageText += emoji;
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.revokePendingImage();
+    this.pendingImage = { file, previewUrl: URL.createObjectURL(file) };
+  }
+
+  clearPendingImage(): void {
+    this.revokePendingImage();
+    this.pendingImage = null;
+  }
+
+  retry(message: Message): void {
+    this.store.retryMessage(message);
+  }
+
+  trackFeed(_: number, item: FeedItem): string {
+    return item.kind === 'message' ? item.message!.id : `sep-${item.label}`;
+  }
+
+  private autoGrow(): void {
+    const input = this.inputRef?.nativeElement;
+    if (!input) return;
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
+  }
+
+  private scrollToBottom(onlyIfNearBottom = false): void {
+    const el = this.feedRef?.nativeElement;
+    if (!el) return;
+    if (onlyIfNearBottom) {
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+      if (distance > 160) return;
+    }
+    el.scrollTop = el.scrollHeight;
+  }
+
+  private revokePendingImage(): void {
+    if (this.pendingImage) URL.revokeObjectURL(this.pendingImage.previewUrl);
+  }
+}
+
+function buildFeed(messages: Message[]): FeedItem[] {
+  const items: FeedItem[] = [];
+  let previous: Message | null = null;
+
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+    const next = messages[i + 1] ?? null;
+
+    if (!previous || dayKey(previous.createdAt) !== dayKey(message.createdAt)) {
+      items.push({ kind: 'separator', label: dayLabel(message.createdAt) });
+    }
+
+    const firstOfGroup =
+      !previous ||
+      previous.senderId !== message.senderId ||
+      dayKey(previous.createdAt) !== dayKey(message.createdAt);
+    const lastOfGroup =
+      !next ||
+      next.senderId !== message.senderId ||
+      dayKey(next.createdAt) !== dayKey(message.createdAt);
+
+    items.push({ kind: 'message', message, firstOfGroup, lastOfGroup });
+    previous = message;
+  }
+  return items;
+}
+
+function dayKey(iso: string): string {
+  return new Date(iso).toDateString();
+}
+
+function dayLabel(iso: string): string {
+  const date = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return 'Today';
+  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+}

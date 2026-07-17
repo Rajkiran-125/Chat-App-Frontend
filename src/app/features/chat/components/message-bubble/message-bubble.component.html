@@ -1,0 +1,38 @@
+<div class="row" [class.row--mine]="mine" [class.row--first]="firstOfGroup" [class.row--last]="lastOfGroup">
+  <div class="bubble" [class.bubble--mine]="mine" [class.bubble--image]="message.type === 'image'"
+    [class.bubble--failed]="message.status === 'failed'" (click)="onBubbleClick()">
+
+    <img *ngIf="message.type === 'image'" class="bubble__image" [src]="message.content" alt="Photo"
+      loading="lazy" />
+    <span *ngIf="message.type === 'text'" class="bubble__text">{{ message.content }}</span>
+
+    <span class="bubble__meta">
+      <span class="bubble__time">{{ message.createdAt | date: 'shortTime' }}</span>
+
+      <!-- Status ticks (own messages only) -->
+      <span class="bubble__status" *ngIf="mine" [ngSwitch]="message.status">
+        <svg *ngSwitchCase="'sending'" class="tick tick--clock" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9" />
+          <polyline points="12 7 12 12 15 14" />
+        </svg>
+        <svg *ngSwitchCase="'sent'" class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <svg *ngSwitchCase="'delivered'" class="tick" viewBox="0 0 28 24" fill="none" stroke="currentColor"
+          stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 6 5 17 1.5 13.5" />
+          <polyline points="26 6 15 17 13 15" />
+        </svg>
+        <svg *ngSwitchCase="'read'" class="tick tick--read" viewBox="0 0 28 24" fill="none" stroke="currentColor"
+          stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 6 5 17 1.5 13.5" />
+          <polyline points="26 6 15 17 13 15" />
+        </svg>
+        <span *ngSwitchCase="'failed'" class="tick tick--failed" title="Tap to retry">!</span>
+      </span>
+    </span>
+  </div>
+  <small class="row__retry" *ngIf="message.status === 'failed'">Not sent — tap the message to retry</small>
+</div>
