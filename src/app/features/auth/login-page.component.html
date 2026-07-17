@@ -97,10 +97,12 @@
 
         <div class="field">
           <span class="field__label">Choose an avatar</span>
-          <div class="auth__avatars">
-            <button type="button" *ngFor="let avatar of avatars" class="auth__avatar"
+          <div class="auth__avatars" role="radiogroup" aria-label="Choose an avatar">
+            <button type="button" *ngFor="let avatar of avatars; let i = index" class="auth__avatar"
+              role="radio" [attr.aria-label]="'Avatar ' + (i + 1)"
+              [attr.aria-checked]="registerForm.controls.avatar.value === avatar"
               [class.selected]="registerForm.controls.avatar.value === avatar" (click)="selectAvatar(avatar)">
-              <img [src]="avatar" alt="avatar option" />
+              <img [src]="avatar" alt="" />
             </button>
           </div>
         </div>

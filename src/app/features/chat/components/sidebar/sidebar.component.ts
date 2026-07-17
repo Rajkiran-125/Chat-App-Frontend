@@ -32,9 +32,7 @@ export class SidebarComponent {
     map(([users, term]) => {
       const query = term.trim().toLowerCase();
       if (!query) return users;
-      return users.filter(
-        (u) => u.userName.toLowerCase().includes(query) || u.phone.includes(query)
-      );
+      return users.filter((u) => u.userName.toLowerCase().includes(query));
     })
   );
 
@@ -56,7 +54,9 @@ export class SidebarComponent {
   }
 
   isTyping(user: SidebarUser, typing: ReadonlySet<string> | null): boolean {
-    return !!user.roomId && !!typing?.has(user.roomId);
+    if (!typing) return false;
+    // Match by user id (works even before the DM room id is known) or room id.
+    return typing.has(user.id) || (!!user.roomId && typing.has(user.roomId));
   }
 
   logout(): void {

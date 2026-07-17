@@ -7,8 +7,12 @@ export interface User {
   lastSeenAt?: string | null;
 }
 
-/** A sidebar entry: another user + my DM room with them (if any). */
-export interface SidebarUser extends User {
+/**
+ * A sidebar entry: another user + my DM room with them (if any).
+ * `phone` is intentionally absent — the server never exposes other users'
+ * phone numbers (they are a login credential).
+ */
+export interface SidebarUser extends Omit<User, 'phone'> {
   online: boolean;
   roomId: string | null;
   lastMessage: Message | null;
@@ -29,6 +33,8 @@ export interface Message {
   content: string;
   status: MessageStatus;
   createdAt: string;
+  /** Client-generated id for optimistic sends + server-side idempotency. */
+  clientId?: string;
 }
 
 export interface AuthResponse {

@@ -29,13 +29,13 @@ import { TimeAgoPipe } from 'src/app/shared/pipes/time-ago.pipe';
           {{ user.online ? 'online' : user.lastSeenAt ? 'last seen ' + (user.lastSeenAt | timeAgo) : 'offline' }}
         </p>
 
-        <div class="drawer__card">
-          <small>Phone</small>
-          <span>{{ user.phone }}</span>
-        </div>
         <div class="drawer__card" *ngIf="user.createdAt">
           <small>Member since</small>
           <span>{{ user.createdAt | date: 'mediumDate' }}</span>
+        </div>
+        <div class="drawer__card">
+          <small>Status</small>
+          <span>{{ user.online ? 'Online now' : 'Offline' }}</span>
         </div>
       </div>
     </aside>

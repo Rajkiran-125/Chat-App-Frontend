@@ -1,6 +1,8 @@
 <div class="row" [class.row--mine]="mine" [class.row--first]="firstOfGroup" [class.row--last]="lastOfGroup">
   <div class="bubble" [class.bubble--mine]="mine" [class.bubble--image]="message.type === 'image'"
-    [class.bubble--failed]="message.status === 'failed'" (click)="onBubbleClick()">
+    [class.bubble--failed]="message.status === 'failed'" (click)="onBubbleClick()"
+    [attr.role]="interactive ? 'button' : null" [attr.tabindex]="interactive ? 0 : null"
+    [attr.aria-label]="ariaLabel" (keydown.enter)="onKey($event)" (keydown.space)="onKey($event)">
 
     <img *ngIf="message.type === 'image'" class="bubble__image" [src]="message.content" alt="Photo"
       loading="lazy" />

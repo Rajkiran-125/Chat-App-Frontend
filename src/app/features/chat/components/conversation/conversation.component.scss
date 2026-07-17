@@ -124,7 +124,8 @@
   padding: 18px 20px 10px;
   display: flex;
   flex-direction: column;
-  scroll-behavior: smooth;
+  /* scroll behavior is controlled explicitly in code via scrollTo({behavior})
+     so history loads jump instantly instead of animating */
 }
 
 .convo__feed-loading {

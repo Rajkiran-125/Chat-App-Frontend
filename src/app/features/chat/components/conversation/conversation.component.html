@@ -88,7 +88,10 @@
   <footer class="convo__composer">
     <app-emoji-picker *ngIf="emojiOpen" (picked)="addEmoji($event)" (closed)="emojiOpen = false" />
 
-    <button class="icon-btn" type="button" (click)="emojiOpen = !emojiOpen" title="Emoji" aria-label="Emoji picker">
+    <!-- stop pointerdown so the picker's own outside-click close doesn't fire,
+         then the click toggles it — otherwise the picker instantly reopens -->
+    <button class="icon-btn" type="button" (pointerdown)="$event.stopPropagation()"
+      (click)="emojiOpen = !emojiOpen" title="Emoji" [attr.aria-expanded]="emojiOpen" aria-label="Emoji picker">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <circle cx="12" cy="12" r="10" />
         <path d="M8 14s1.5 2 4 2 4-2 4-2" />
@@ -97,15 +100,16 @@
       </svg>
     </button>
 
-    <label class="icon-btn convo__attach" title="Send a photo">
-      <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
+    <button type="button" class="icon-btn convo__attach" title="Send a photo" aria-label="Send a photo"
+      (click)="openFilePicker(fileInput)">
+      <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
         <circle cx="8.5" cy="8.5" r="1.5" />
         <polyline points="21 15 16 10 5 21" />
       </svg>
-    </label>
+    </button>
 
     <textarea #messageInput rows="1" placeholder="Type a message…" [(ngModel)]="messageText"
       (ngModelChange)="onInputChange()" (keydown.enter)="onEnter($event)" aria-label="Message"></textarea>

@@ -65,15 +65,32 @@ export class ConversationComponent implements AfterViewInit, OnDestroy {
   );
 
   private subscription = new Subscription();
+  private lastMessageId: string | null = null;
 
   ngAfterViewInit(): void {
-    // Stick to the bottom whenever the feed changes.
+    // Auto-scroll rules: jump to the bottom for my own new message, otherwise
+    // only if the user is already near the bottom (don't yank them away from
+    // older messages they're reading). Status-only changes never scroll.
     this.subscription.add(
-      this.feed$.subscribe(() => queueMicrotask(() => this.scrollToBottom()))
+      this.store.messages$.subscribe((messages) => {
+        const last = messages[messages.length - 1];
+        const isNewMessage = !!last && last.id !== this.lastMessageId;
+        this.lastMessageId = last ? last.id : null;
+        if (!isNewMessage) return;
+        const mine = last!.senderId === this.auth.currentUser?.id;
+        this.afterRender(() => this.scrollToBottom(!mine));
+      })
     );
     this.subscription.add(
-      this.activeTyping$.subscribe(() => queueMicrotask(() => this.scrollToBottom(true)))
+      this.activeTyping$.subscribe((typing) => {
+        if (typing) this.afterRender(() => this.scrollToBottom(true));
+      })
     );
+  }
+
+  /** Run after the browser has painted the new DOM, so scrollHeight is correct. */
+  private afterRender(fn: () => void): void {
+    requestAnimationFrame(() => requestAnimationFrame(fn));
   }
 
   ngOnDestroy(): void {
@@ -96,9 +113,16 @@ export class ConversationComponent implements AfterViewInit, OnDestroy {
 
   onEnter(event: Event): void {
     const keyboard = event as KeyboardEvent;
+    // Don't send mid-IME-composition (e.g. selecting a CJK candidate with Enter).
+    if (keyboard.isComposing || keyboard.keyCode === 229) return;
     if (keyboard.shiftKey) return;
     keyboard.preventDefault();
     void this.send();
+  }
+
+  /** Keyboard-accessible trigger for the hidden file input. */
+  openFilePicker(input: HTMLInputElement): void {
+    input.click();
   }
 
   async send(): Promise<void> {
@@ -168,7 +192,9 @@ export class ConversationComponent implements AfterViewInit, OnDestroy {
       const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
       if (distance > 160) return;
     }
-    el.scrollTop = el.scrollHeight;
+    // Explicit 'auto' (instant); the CSS no longer sets scroll-behavior: smooth,
+    // which used to animate history loads and defeat the near-bottom check.
+    el.scrollTo({ top: el.scrollHeight, behavior: 'auto' });
   }
 
   private revokePendingImage(): void {

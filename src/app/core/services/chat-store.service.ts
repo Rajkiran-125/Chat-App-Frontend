@@ -50,9 +50,11 @@ export class ChatStoreService {
   private subscriptions = new Subscription();
   private typingTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private myTypingTimer: ReturnType<typeof setTimeout> | null = null;
-  private tempIdCounter = 1;
+  private myTypingRoomId: string | null = null;
   private initialized = false;
   private hadFirstConnect = false;
+  /** Incremented on every openChat/closeChat so stale async continuations bail out. */
+  private openSeq = 0;
 
   get activeChat(): SidebarUser | null {
     return this.activeChatSubject.value;
@@ -80,6 +82,14 @@ export class ChatStoreService {
     this.subscriptions.add(
       this.socket.on<TypingEvent>('typing').subscribe((evt) => this.onTyping(evt))
     );
+    // Read receipt from one of my own other tabs: clear the unread badge here too.
+    this.subscriptions.add(
+      this.socket.on<{ roomId: string }>('room:read').subscribe(({ roomId }) => {
+        this.usersSubject.next(
+          this.usersSubject.value.map((u) => (u.roomId === roomId ? { ...u, unreadCount: 0 } : u))
+        );
+      })
+    );
     // After a reconnect, rejoin the room and resync everything we may have missed.
     this.subscriptions.add(
       this.socket.on<void>('connect').subscribe(() => {
@@ -95,12 +105,24 @@ export class ChatStoreService {
         this.loadUsers();
       })
     );
+    // Any path that clears the session (explicit logout OR a 401 in the
+    // interceptor) drives currentUser$ to null; tear down exactly once here so
+    // the socket/listeners never leak into the next login.
+    this.subscriptions.add(
+      this.auth.currentUser$.subscribe((user) => {
+        if (!user && this.initialized) this.teardown();
+      })
+    );
 
     this.loadUsers();
   }
 
   /** Full reset - used on logout. */
   teardown(): void {
+    // Flip the flag first so in-flight HTTP callbacks (loadUsers/history) bail
+    // out instead of repopulating state we are about to clear.
+    this.initialized = false;
+    this.openSeq++;
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
     this.socket.disconnect();
@@ -108,26 +130,32 @@ export class ChatStoreService {
     this.typingTimers.clear();
     if (this.myTypingTimer) clearTimeout(this.myTypingTimer);
     this.myTypingTimer = null;
+    this.myTypingRoomId = null;
     this.usersSubject.next([]);
     this.activeChatSubject.next(null);
     this.messagesSubject.next([]);
     this.typingSubject.next(new Set());
-    this.initialized = false;
     this.hadFirstConnect = false;
   }
 
   loadUsers(): void {
     this.loadingUsersSubject.next(true);
-    this.api.users().subscribe({
-      next: ({ users }) => {
-        this.usersSubject.next(users);
-        this.loadingUsersSubject.next(false);
-      },
-      error: () => {
-        this.loadingUsersSubject.next(false);
-        this.toast.error('Could not load your chats. Retrying may help.');
-      }
-    });
+    // Tracked so teardown() cancels an in-flight request; guarded so a late
+    // response after logout cannot repopulate the cleared sidebar.
+    this.subscriptions.add(
+      this.api.users().subscribe({
+        next: ({ users }) => {
+          if (!this.initialized) return;
+          this.usersSubject.next(users);
+          this.loadingUsersSubject.next(false);
+        },
+        error: () => {
+          if (!this.initialized) return;
+          this.loadingUsersSubject.next(false);
+          this.toast.error('Could not load your chats. Retrying may help.');
+        }
+      })
+    );
   }
 
   /** Open (or create) the DM with a user and load its history. */
@@ -139,6 +167,9 @@ export class ChatStoreService {
       this.socket.emit('room:leave', { roomId: previous.roomId });
     }
 
+    // Each open gets a token; any await below bails out if a newer open (or a
+    // close) has since happened, so a slow response can't clobber a newer chat.
+    const seq = ++this.openSeq;
     let roomId = user.roomId;
     this.messagesSubject.next([]);
     this.loadingMessagesSubject.next(true);
@@ -147,34 +178,54 @@ export class ChatStoreService {
     try {
       if (!roomId) {
         const { room } = await firstValueFrom(this.api.openRoom(user.id));
+        if (seq !== this.openSeq) return;
         roomId = room.id;
         this.patchUser(user.id, { roomId });
       }
-      this.activeChatSubject.next({ ...user, roomId });
+      // Rebuild from the freshest sidebar entry (presence may have changed
+      // during the await), then patch in the room id.
+      const fresh = this.usersSubject.value.find((u) => u.id === user.id) ?? user;
+      this.activeChatSubject.next({ ...fresh, roomId });
       this.socket.emit('room:join', { roomId });
 
       const page = await firstValueFrom(this.api.history(roomId));
-      // Ignore stale responses if the user already switched chats.
-      if (this.activeChat?.roomId === roomId) {
-        this.messagesSubject.next(page.messages);
-        this.markRoomRead(roomId);
-      }
+      if (seq !== this.openSeq || this.activeChat?.roomId !== roomId) return;
+      this.messagesSubject.next(this.mergeHistory(page.messages, roomId));
+      this.markRoomRead(roomId);
     } catch {
+      if (seq !== this.openSeq) return;
       this.toast.error('Could not open this conversation.');
       this.activeChatSubject.next(null);
     } finally {
-      this.loadingMessagesSubject.next(false);
+      if (seq === this.openSeq) this.loadingMessagesSubject.next(false);
     }
   }
 
   /** Mobile back button / deselect. */
   closeChat(): void {
+    this.openSeq++;
     const active = this.activeChat;
     if (active?.roomId) {
       this.socket.emit('room:leave', { roomId: active.roomId });
     }
     this.activeChatSubject.next(null);
     this.messagesSubject.next([]);
+  }
+
+  /**
+   * Merge a server history page with whatever is already on screen so an
+   * incoming message that arrived DURING the fetch (or an optimistic temp)
+   * is never dropped. Server messages win on id; local temps are kept.
+   */
+  private mergeHistory(serverMessages: Message[], roomId: string): Message[] {
+    const current = this.messagesSubject.value.filter((m) => m.roomId === roomId);
+    const byId = new Map<string, Message>();
+    serverMessages.forEach((m) => byId.set(m.id, m));
+    // Keep local-only messages (server echo not yet seen, or optimistic temps).
+    current.forEach((m) => {
+      if (!byId.has(m.id)) byId.set(m.id, m);
+    });
+    return [...byId.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
   async sendText(content: string): Promise<void> {
@@ -201,49 +252,72 @@ export class ChatStoreService {
     }
   }
 
-  /** Notify the other user that I'm typing (auto-stops after a pause). */
+  /**
+   * Notify the other user that I'm typing (auto-stops after a pause). Timer is
+   * scoped to a room: switching chats flushes isTyping:false to the old room so
+   * it never gets stuck, and lets the new room emit isTyping:true immediately.
+   */
   notifyTyping(): void {
     const roomId = this.activeChat?.roomId;
     if (!roomId) return;
+
+    if (this.myTypingRoomId && this.myTypingRoomId !== roomId) {
+      this.stopTyping();
+    }
     if (!this.myTypingTimer) {
       this.socket.emit('typing', { roomId, isTyping: true });
+      this.myTypingRoomId = roomId;
     } else {
       clearTimeout(this.myTypingTimer);
     }
-    this.myTypingTimer = setTimeout(() => {
+    this.myTypingTimer = setTimeout(() => this.stopTyping(), 2000);
+  }
+
+  private stopTyping(): void {
+    if (this.myTypingTimer) {
+      clearTimeout(this.myTypingTimer);
       this.myTypingTimer = null;
-      this.socket.emit('typing', { roomId, isTyping: false });
-    }, 2000);
+    }
+    if (this.myTypingRoomId) {
+      this.socket.emit('typing', { roomId: this.myTypingRoomId, isTyping: false });
+      this.myTypingRoomId = null;
+    }
   }
 
   retryMessage(message: Message): void {
     if (message.status !== 'failed') return;
     this.messagesSubject.next(this.messagesSubject.value.filter((m) => m.id !== message.id));
-    void this.send(message.type, message.content);
+    // Reuse the original clientId so the server dedupes if the first attempt
+    // actually arrived (a retry after a lost ack must not create a duplicate).
+    void this.send(message.type, message.content, message.clientId);
   }
 
-  private async send(type: MessageType, content: string): Promise<void> {
+  private async send(type: MessageType, content: string, clientId?: string): Promise<void> {
     const me = this.auth.currentUser;
     const roomId = this.activeChat?.roomId;
     if (!me || !roomId) return;
 
+    const cid = clientId ?? randomId();
     const temp: Message = {
-      id: `tmp-${this.tempIdCounter++}`,
+      id: `tmp-${cid}`,
       roomId,
       senderId: me.id,
       senderName: me.userName,
       type,
       content,
       status: 'sending',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      clientId: cid
     };
     this.appendMessage(temp);
 
     try {
-      const ack = await this.socket.emitWithAck<{ ok: boolean; message?: Message; message_text?: string }>(
-        'message:send',
-        { roomId, type, content }
-      );
+      const ack = await this.socket.emitWithAck<{ ok: boolean; message?: Message }>('message:send', {
+        roomId,
+        type,
+        content,
+        clientId: cid
+      });
       if (ack.ok && ack.message) {
         this.replaceMessage(temp.id, ack.message);
         this.updateSidebarForMessage(ack.message);
@@ -265,6 +339,12 @@ export class ChatStoreService {
 
     if (!isMine) {
       this.socket.emit('message:delivered', { roomId: msg.roomId, messageId: msg.id });
+    }
+
+    // If no sidebar entry knows this room yet (e.g. a room created on another
+    // tab, or my own echo before the list learned the room), refresh the list.
+    if (!this.usersSubject.value.some((u) => u.roomId === msg.roomId)) {
+      this.loadUsers();
     }
 
     if (this.activeChat?.roomId === msg.roomId) {
@@ -318,6 +398,13 @@ export class ChatStoreService {
   }
 
   private onPresenceUpdate(p: PresenceUpdate): void {
+    const known = this.usersSubject.value.some((u) => u.id === p.userId);
+    if (!known) {
+      // A user we have never seen just came online (e.g. they just registered).
+      // Refetch the sidebar so they appear immediately.
+      if (p.online) this.loadUsers();
+      return;
+    }
     this.patchUser(p.userId, { online: p.online, lastSeenAt: p.lastSeenAt });
     const active = this.activeChat;
     if (active?.id === p.userId) {
@@ -326,24 +413,28 @@ export class ChatStoreService {
   }
 
   private onTyping(evt: TypingEvent): void {
+    // Track BOTH the roomId and the senderId. The conversation view keys off
+    // roomId; the sidebar keys off the user id, which matters before the first
+    // message when the recipient may not know the room id yet.
     const current = new Set(this.typingSubject.value);
+    const keys = [evt.roomId, evt.userId];
     const existing = this.typingTimers.get(evt.roomId);
     if (existing) clearTimeout(existing);
 
     if (evt.isTyping) {
-      current.add(evt.roomId);
+      keys.forEach((k) => current.add(k));
       // Safety net: clear even if the stop event never arrives.
       this.typingTimers.set(
         evt.roomId,
         setTimeout(() => {
           const next = new Set(this.typingSubject.value);
-          next.delete(evt.roomId);
+          keys.forEach((k) => next.delete(k));
           this.typingSubject.next(next);
           this.typingTimers.delete(evt.roomId);
         }, 3500)
       );
     } else {
-      current.delete(evt.roomId);
+      keys.forEach((k) => current.delete(k));
       this.typingTimers.delete(evt.roomId);
     }
     this.typingSubject.next(current);
@@ -400,16 +491,35 @@ export class ChatStoreService {
   }
 
   private reloadActiveHistory(roomId: string): void {
-    this.api.history(roomId).subscribe({
-      next: (page) => {
-        if (this.activeChat?.roomId === roomId) {
-          this.messagesSubject.next(page.messages);
+    this.subscriptions.add(
+      this.api.history(roomId).subscribe({
+        next: (page) => {
+          if (!this.initialized || this.activeChat?.roomId !== roomId) return;
+          // Merge (not replace) so optimistic 'sending'/'failed' messages the
+          // server hasn't stored survive the reconnect resync.
+          const temps = this.messagesSubject.value.filter(
+            (m) => m.roomId === roomId && (m.status === 'sending' || m.status === 'failed')
+          );
+          const merged = this.mergeHistory(page.messages, roomId);
+          temps.forEach((t) => {
+            if (!merged.some((m) => m.id === t.id || (t.clientId && m.clientId === t.clientId))) {
+              merged.push(t);
+            }
+          });
+          this.messagesSubject.next(merged);
           this.markRoomRead(roomId);
-        }
-      },
-      error: () => undefined
-    });
+        },
+        error: () => undefined
+      })
+    );
   }
+}
+
+/** Short random id for optimistic message clientIds. */
+function randomId(): string {
+  const c = globalThis.crypto as Crypto | undefined;
+  if (c?.randomUUID) return c.randomUUID();
+  return `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 /** Downscale to <=1280px and encode as JPEG (or keep PNG for small images). */
