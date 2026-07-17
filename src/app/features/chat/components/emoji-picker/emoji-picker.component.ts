@@ -11,11 +11,10 @@ import { CommonModule } from '@angular/common';
 import { EMOJI_CATEGORIES } from 'src/app/core/utils/emoji-data';
 
 @Component({
-  selector: 'app-emoji-picker',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-emoji-picker',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <div class="picker" role="dialog" aria-label="Emoji picker">
       <div class="picker__tabs">
         <button
@@ -39,8 +38,8 @@ import { EMOJI_CATEGORIES } from 'src/app/core/utils/emoji-data';
       </div>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .picker {
         position: absolute;
         bottom: calc(100% + 8px);
@@ -108,7 +107,7 @@ import { EMOJI_CATEGORIES } from 'src/app/core/utils/emoji-data';
         }
       }
     `
-  ]
+    ]
 })
 export class EmojiPickerComponent {
   @Output() picked = new EventEmitter<string>();

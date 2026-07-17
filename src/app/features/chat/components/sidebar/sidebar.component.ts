@@ -12,12 +12,11 @@ import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.compone
 import { TimeAgoPipe } from 'src/app/shared/pipes/time-ago.pipe';
 
 @Component({
-  selector: 'app-sidebar',
-  standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent, TimeAgoPipe],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss']
+    selector: 'app-sidebar',
+    imports: [CommonModule, FormsModule, AvatarComponent, TimeAgoPipe],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent {
   store = inject(ChatStoreService);

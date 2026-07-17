@@ -30,19 +30,18 @@ interface FeedItem {
 }
 
 @Component({
-  selector: 'app-conversation',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    AvatarComponent,
-    TimeAgoPipe,
-    MessageBubbleComponent,
-    EmojiPickerComponent
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './conversation.component.html',
-  styleUrls: ['./conversation.component.scss']
+    selector: 'app-conversation',
+    imports: [
+        CommonModule,
+        FormsModule,
+        AvatarComponent,
+        TimeAgoPipe,
+        MessageBubbleComponent,
+        EmojiPickerComponent
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './conversation.component.html',
+    styleUrls: ['./conversation.component.scss']
 })
 export class ConversationComponent implements AfterViewInit, OnDestroy {
   store = inject(ChatStoreService);

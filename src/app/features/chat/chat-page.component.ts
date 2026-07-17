@@ -7,17 +7,16 @@ import { ProfileDrawerComponent } from './components/profile-drawer/profile-draw
 import { ImageLightboxComponent } from './components/image-lightbox/image-lightbox.component';
 
 @Component({
-  selector: 'app-chat-page',
-  standalone: true,
-  imports: [
-    CommonModule,
-    SidebarComponent,
-    ConversationComponent,
-    ProfileDrawerComponent,
-    ImageLightboxComponent
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-chat-page',
+    imports: [
+        CommonModule,
+        SidebarComponent,
+        ConversationComponent,
+        ProfileDrawerComponent,
+        ImageLightboxComponent
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <div class="shell" [class.shell--chat-open]="!!(store.activeChat$ | async)">
       <app-sidebar class="shell__sidebar" />
       <app-conversation
@@ -33,7 +32,7 @@ import { ImageLightboxComponent } from './components/image-lightbox/image-lightb
       <app-image-lightbox *ngIf="lightboxSrc" [src]="lightboxSrc" (closed)="lightboxSrc = null" />
     </div>
   `,
-  styleUrls: ['./chat-page.component.scss']
+    styleUrls: ['./chat-page.component.scss']
 })
 export class ChatPageComponent implements OnInit {
   store = inject(ChatStoreService);

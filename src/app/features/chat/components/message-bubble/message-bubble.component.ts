@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Message } from 'src/app/core/models/chat.models';
 
 @Component({
-  selector: 'app-message-bubble',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './message-bubble.component.html',
-  styleUrls: ['./message-bubble.component.scss']
+    selector: 'app-message-bubble',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './message-bubble.component.html',
+    styleUrls: ['./message-bubble.component.scss']
 })
 export class MessageBubbleComponent {
   @Input({ required: true }) message!: Message;

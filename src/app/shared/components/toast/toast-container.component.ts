@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ToastService } from 'src/app/core/services/toast.service';
 
 @Component({
-  selector: 'app-toast-container',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-toast-container',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <div class="toasts" aria-live="polite">
       <div
         *ngFor="let toast of toastService.toasts$ | async; trackBy: trackById"
@@ -24,8 +23,8 @@ import { ToastService } from 'src/app/core/services/toast.service';
       </div>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .toasts {
         position: fixed;
         top: 16px;
@@ -80,7 +79,7 @@ import { ToastService } from 'src/app/core/services/toast.service';
         }
       }
     `
-  ]
+    ]
 })
 export class ToastContainerComponent {
   toastService = inject(ToastService);

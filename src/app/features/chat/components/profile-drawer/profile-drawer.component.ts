@@ -5,11 +5,10 @@ import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.compone
 import { TimeAgoPipe } from 'src/app/shared/pipes/time-ago.pipe';
 
 @Component({
-  selector: 'app-profile-drawer',
-  standalone: true,
-  imports: [CommonModule, AvatarComponent, TimeAgoPipe],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-profile-drawer',
+    imports: [CommonModule, AvatarComponent, TimeAgoPipe],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <div class="backdrop" (click)="closed.emit()"></div>
     <aside class="drawer" role="dialog" aria-label="Contact info">
       <header class="drawer__header">
@@ -41,8 +40,8 @@ import { TimeAgoPipe } from 'src/app/shared/pipes/time-ago.pipe';
       </div>
     </aside>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .backdrop {
         position: absolute;
         inset: 0;
@@ -138,7 +137,7 @@ import { TimeAgoPipe } from 'src/app/shared/pipes/time-ago.pipe';
         }
       }
     `
-  ]
+    ]
 })
 export class ProfileDrawerComponent {
   @Input({ required: true }) user!: SidebarUser;

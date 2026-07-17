@@ -12,12 +12,11 @@ import { AVATAR_PRESETS } from 'src/app/core/utils/avatars';
 const PHONE_PATTERN = /^\+?[\d\s-]{4,15}$/;
 
 @Component({
-  selector: 'app-login-page',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss']
+    selector: 'app-login-page',
+    imports: [CommonModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './login-page.component.html',
+    styleUrls: ['./login-page.component.scss']
 })
 export class LoginPageComponent {
   private fb = inject(FormBuilder);

@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 
 /** Circular avatar with an optional presence dot and initials fallback. */
 @Component({
-  selector: 'app-avatar',
-  standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: 'app-avatar',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     <span class="avatar" [style.width.px]="size" [style.height.px]="size">
       <img
         *ngIf="src && !failed; else initials"
@@ -28,8 +27,8 @@ import { CommonModule } from '@angular/common';
       ></span>
     </span>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .avatar {
         position: relative;
         display: inline-flex;
@@ -68,7 +67,7 @@ import { CommonModule } from '@angular/common';
         background: var(--online);
       }
     `
-  ]
+    ]
 })
 export class AvatarComponent {
   @Input() src: string | null = null;
